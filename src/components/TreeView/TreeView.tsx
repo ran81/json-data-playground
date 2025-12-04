@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import TreeNode from "./TreeNode";
 
 type Props = {
@@ -8,6 +8,95 @@ type Props = {
 export default function TreeView({ value }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPath, setSelectedPath] = useState<string>("Root");
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+
+  // toggle a single path
+  const togglePath = useCallback((p: string) => {
+    setExpandedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(p)) next.delete(p);
+      else next.add(p);
+      return next;
+    });
+  }, []);
+
+  // collect all expandable paths (objects/arrays) from the root
+  const collectExpandablePaths = useCallback((rootValue: unknown) => {
+    const result = new Set<string>();
+
+    function walk(v: unknown, path: string) {
+      if (v === null || typeof v !== "object") return;
+
+      // this path is expandable (object or array)
+      result.add(path);
+
+      if (Array.isArray(v)) {
+        for (let i = 0; i < v.length; i++) {
+          walk(v[i], `${path}[${i}]`);
+        }
+      } else {
+        for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+          walk(val, `${path}.${k}`);
+        }
+      }
+    }
+
+    walk(rootValue, "Root");
+    return result;
+  }, []);
+
+  const expandAll = useCallback(() => {
+    const all = collectExpandablePaths(value);
+    setExpandedPaths(all);
+  }, [collectExpandablePaths, value]);
+
+  const collapseAll = useCallback(() => {
+    setExpandedPaths(new Set());
+  }, []);
+
+  const autoExpandedPaths = useMemo(() => {
+    if (!searchTerm.trim()) return new Set<string>();
+
+    const result = new Set<string>();
+    const term = searchTerm.trim().toLowerCase();
+
+    function walk(value: unknown, path: string) {
+      if (value === null || typeof value !== "object") return;
+
+      // check if any child matches
+      const matches = (v: unknown, name: string): boolean => {
+        if (name.toLowerCase().includes(term)) return true;
+        if (v === null) return "null".includes(term);
+        if (typeof v !== "object")
+          return String(v).toLowerCase().includes(term);
+
+        if (Array.isArray(v)) {
+          return v.some((child, i) => matches(child, String(i)));
+        }
+
+        for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+          if (matches(val, k)) return true;
+        }
+        return false;
+      };
+
+      if (matches(value, path.split(".").pop() || "")) {
+        result.add(path); // auto-expand this branch
+      }
+
+      // Recurse children
+      if (Array.isArray(value)) {
+        value.forEach((v, i) => walk(v, `${path}[${i}]`));
+      } else {
+        for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+          walk(v, `${path}.${k}`);
+        }
+      }
+    }
+
+    walk(value, "Root");
+    return result;
+  }, [value, searchTerm]);
 
   return (
     <div className="font-mono text-sm p-2 space-y-3">
@@ -28,6 +117,24 @@ export default function TreeView({ value }: Props) {
             &#x2715;
           </button>
         )}
+
+        <div className="flex gap-2">
+          <button
+            onClick={expandAll}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            title="Expand all nodes"
+          >
+            Expand All
+          </button>
+
+          <button
+            onClick={collapseAll}
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            title="Collapse all nodes"
+          >
+            Collapse All
+          </button>
+        </div>
       </div>
 
       {/* Selected path panel */}
@@ -46,6 +153,8 @@ export default function TreeView({ value }: Props) {
           selectedPath={selectedPath}
           onSelectPath={setSelectedPath}
           searchTerm={searchTerm}
+          expandedPaths={new Set([...expandedPaths, ...autoExpandedPaths])}
+          togglePath={togglePath}
         />
       </div>
     </div>

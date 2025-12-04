@@ -1,4 +1,3 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { isPlainObject } from "../../lib/jsonUtils";
 
 type Props = {
@@ -9,6 +8,8 @@ type Props = {
   selectedPath: string;
   onSelectPath: (p: string) => void;
   searchTerm: string;
+  expandedPaths: Set<string>;
+  togglePath: (p: string) => void;
 };
 
 export default function TreeNode({
@@ -19,18 +20,14 @@ export default function TreeNode({
   selectedPath,
   onSelectPath,
   searchTerm,
+  expandedPaths,
+  togglePath,
 }: Props) {
   // Determine whether this node is "expandable" (object or array)
   const isExpandable = typeof value === "object" && value !== null;
 
   // Helper: primitive string to display
-  const valueAsString = useMemo(() => {
-    if (typeof value === "string") return `"${value}"`;
-    if (value === null) return "null";
-    if (typeof value === "undefined") return "undefined";
-    if (typeof value === "object") return null;
-    return String(value);
-  }, [value]);
+  const valueAsString = getPrimitiveString(value);
 
   // Search matching logic
   const term = searchTerm.trim().toLowerCase();
@@ -41,67 +38,6 @@ export default function TreeNode({
     valueAsString.toLowerCase().includes(term);
 
   const thisNodeMatches = keyMatches || valueMatches;
-
-  // Recursive helper to check whether subtree contains the search term.
-  // We keep this function pure and independent of component state.
-  function subtreeContainsMatch(
-    v: unknown,
-    nodeName: string,
-    q: string
-  ): boolean {
-    if (!q) return false;
-    const lower = q.toLowerCase();
-
-    // Check current node name
-    if (nodeName.toLowerCase().includes(lower)) return true;
-
-    // Primitive value check
-    if (v === null) {
-      if ("null".includes(lower)) return true;
-      return false;
-    }
-    if (typeof v !== "object") {
-      if (String(v).toLowerCase().includes(lower)) return true;
-      return false;
-    }
-
-    // Array
-    if (Array.isArray(v)) {
-      for (let i = 0; i < v.length; i++) {
-        if (subtreeContainsMatch(v[i], String(i), q)) return true;
-      }
-      return false;
-    }
-
-    // Plain object
-    if (isPlainObject(v)) {
-      for (const [k, val] of Object.entries(v)) {
-        if (subtreeContainsMatch(val, k, q)) return true;
-      }
-      return false;
-    }
-
-    return false;
-  }
-
-  const subtreeHasMatch = useMemo(
-    () => subtreeContainsMatch(value, name, term),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [value, name, term]
-  );
-
-  // open state: auto-open if there's a search term that matches inside
-  const [open, setOpen] = useState<boolean>(!!subtreeHasMatch);
-
-  // When searchTerm changes, force-open matching branches.
-  useEffect(() => {
-    if (term) {
-      setOpen(subtreeHasMatch);
-    }
-    // when search cleared, keep the user's open/close preference (don't auto-collapse)
-    // If you prefer to collapse when search cleared, uncomment next line:
-    // else setOpen(false);
-  }, [term, subtreeHasMatch]);
 
   // Selected highlight
   const isSelected = selectedPath === path;
@@ -122,9 +58,11 @@ export default function TreeNode({
   // caret click toggles open
   function toggleOpen(e: React.MouseEvent) {
     e.stopPropagation();
-    setOpen((s) => !s);
+    togglePath(path);
     onSelectPath(path); // also select when toggling
   }
+
+  const isExpanded = expandedPaths.has(path);
 
   // Render primitive
   if (!isExpandable) {
@@ -154,12 +92,8 @@ export default function TreeNode({
           onClick={handleSelect}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
         >
-          <button
-            onClick={toggleOpen}
-            className="mr-2 text-xs"
-            aria-label={open ? "Collapse" : "Expand"}
-          >
-            {open ? "▼" : "▶"}
+          <button onClick={toggleOpen} className="mr-2 text-xs">
+            {isExpanded ? "▼" : "▶"}
           </button>
 
           <span className={`${matchHighlightClass}`}>
@@ -168,7 +102,7 @@ export default function TreeNode({
           </span>
         </div>
 
-        {open &&
+        {isExpanded &&
           value.map((v, i) => (
             <TreeNode
               key={i}
@@ -179,6 +113,8 @@ export default function TreeNode({
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
               searchTerm={searchTerm}
+              expandedPaths={expandedPaths}
+              togglePath={togglePath}
             />
           ))}
       </div>
@@ -196,12 +132,8 @@ export default function TreeNode({
           onClick={handleSelect}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
         >
-          <button
-            onClick={toggleOpen}
-            className="mr-2 text-xs"
-            aria-label={open ? "Collapse" : "Expand"}
-          >
-            {open ? "▼" : "▶"}
+          <button onClick={toggleOpen} className="mr-2 text-xs">
+            {isExpanded ? "▼" : "▶"}
           </button>
 
           <span className={`${matchHighlightClass}`}>
@@ -210,7 +142,7 @@ export default function TreeNode({
           </span>
         </div>
 
-        {open &&
+        {isExpanded &&
           entries.map(([k, v]) => (
             <TreeNode
               key={k}
@@ -221,6 +153,8 @@ export default function TreeNode({
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
               searchTerm={searchTerm}
+              expandedPaths={expandedPaths}
+              togglePath={togglePath}
             />
           ))}
       </div>
@@ -239,6 +173,14 @@ export default function TreeNode({
       </div>
     </div>
   );
+}
+
+function getPrimitiveString(value: unknown) {
+  if (typeof value === "string") return `"${value}"`;
+  if (value === null) return "null";
+  if (typeof value === "undefined") return "undefined";
+  if (typeof value === "object") return null;
+  return String(value);
 }
 
 /* Helpers */
