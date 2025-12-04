@@ -101,7 +101,7 @@ export default function TreeView({ value }: Props) {
   return (
     <div className="font-mono text-sm p-2 space-y-3">
       {/* Search input */}
-      <div className="flex relative">
+      <div className="flex relative gap-2">
         <input
           type="text"
           placeholder="Search keys or values..."
@@ -111,7 +111,7 @@ export default function TreeView({ value }: Props) {
         />
         {searchTerm && (
           <button
-            className="relative right-5"
+            className="relative right-8"
             onClick={() => setSearchTerm("")}
           >
             &#x2715;

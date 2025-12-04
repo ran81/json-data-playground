@@ -1,61 +1,94 @@
+import { useRef } from "react";
+import { editor } from "monaco-editor";
+import Editor, { type OnChange } from "@monaco-editor/react";
+
 type Props = {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (val: string) => void;
 };
 
-function JsonEditor({ value, onChange }: Props) {
-  function handleSample() {
-    const sample = {
-      users: [
-        { id: 1, name: "Alice", age: 30 },
-        { id: 2, name: "Bob", age: 25 },
-      ],
-    };
-    onChange(JSON.stringify(sample, null, 2));
-  }
+const sampleJson = `{
+  "users": [
+    { "id": 1, "name": "Alice" },
+    { "id": 2, "name": "Bob" }
+  ],
+  "active": true
+}`;
 
-  function handleFormat() {
+export default function JsonEditor({ value, onChange }: Props) {
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
+  const handleEditorDidMount = (
+    editorInstance: editor.IStandaloneCodeEditor
+  ) => {
+    editorRef.current = editorInstance;
+  };
+
+  const handleFormat = () => {
+    if (!editorRef.current) return;
     try {
-      const parsed = JSON.parse(value);
-      onChange(JSON.stringify(parsed, null, 2));
-    } catch {
-      // ignore for now — error panel will handle it later
+      const formatted = JSON.stringify(JSON.parse(value), null, 2);
+      onChange(formatted);
+      editorRef.current.setValue(formatted);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert("Invalid JSON: cannot format");
+      }
     }
-  }
+  };
 
-  function handleClear() {
+  const handleClear = () => {
     onChange("");
-  }
+    editorRef.current?.setValue("");
+  };
+
+  const handleSample = () => {
+    onChange(sampleJson);
+    editorRef.current?.setValue(sampleJson);
+  };
+
+  const handleChange: OnChange = (val) => {
+    if (val !== undefined) onChange(val);
+  };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Buttons */}
       <div className="flex gap-2 mb-2">
         <button
-          className="px-3 py-1 bg-gray-200 rounded"
           onClick={handleFormat}
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
         >
           Format
         </button>
-        <button className="px-3 py-1 bg-gray-200 rounded" onClick={handleClear}>
+        <button
+          onClick={handleClear}
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+        >
           Clear
         </button>
         <button
-          className="px-3 py-1 bg-gray-200 rounded"
           onClick={handleSample}
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
         >
           Sample JSON
         </button>
       </div>
 
-      {/* Textarea */}
-      <textarea
-        className="flex-1 font-mono text-sm p-2 border rounded resize-none"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <div className="flex-1 border rounded overflow-hidden">
+        <Editor
+          height="100%"
+          defaultLanguage="json"
+          value={value}
+          onChange={handleChange}
+          onMount={handleEditorDidMount}
+          options={{
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            wordWrap: "on",
+          }}
+        />
+      </div>
     </div>
   );
 }
-
-export default JsonEditor;
