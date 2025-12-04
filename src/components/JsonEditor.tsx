@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { editor } from "monaco-editor";
 import Editor, { type OnChange } from "@monaco-editor/react";
 
 type Props = {
   value: string;
   onChange: (val: string) => void;
+  onClear?: () => void;
 };
 
 const sampleJson = `{
@@ -15,17 +16,27 @@ const sampleJson = `{
   "active": true
 }`;
 
-export default function JsonEditor({ value, onChange }: Props) {
+export default function JsonEditor({ value, onChange, onClear }: Props) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({
+    line: 1,
+    column: 1,
+  });
 
   const handleEditorDidMount = (
     editorInstance: editor.IStandaloneCodeEditor
   ) => {
     editorRef.current = editorInstance;
+    editorInstance.onDidChangeCursorPosition((e) => {
+      setCursorPos({ line: e.position.lineNumber, column: e.position.column });
+    });
   };
 
   const handleFormat = () => {
     if (!editorRef.current) return;
+    if (!value.trim()) {
+      return;
+    }
     try {
       const formatted = JSON.stringify(JSON.parse(value), null, 2);
       onChange(formatted);
@@ -40,6 +51,7 @@ export default function JsonEditor({ value, onChange }: Props) {
   const handleClear = () => {
     onChange("");
     editorRef.current?.setValue("");
+    onClear?.();
   };
 
   const handleSample = () => {
@@ -88,6 +100,9 @@ export default function JsonEditor({ value, onChange }: Props) {
             wordWrap: "on",
           }}
         />
+      </div>
+      <div className="h-6 text-sm text-gray-500 flex justify-end items-center px-2 border-t border-gray-200">
+        Ln {cursorPos.line}, Col {cursorPos.column}
       </div>
     </div>
   );

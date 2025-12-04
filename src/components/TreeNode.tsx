@@ -1,4 +1,4 @@
-import { isPlainObject } from "../../lib/jsonUtils";
+import { isPlainObject } from "../lib/jsonUtils";
 
 type Props = {
   name: string;

@@ -1,5 +1,5 @@
-import { inferType } from "../../lib/inferType";
-import { renderTs } from "../../lib/renderTs";
+import { inferType } from "../lib/inferType";
+import { renderTs } from "../lib/renderTs";
 
 type Props = {
   value: unknown;

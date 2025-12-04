@@ -3,11 +3,20 @@ import TreeNode from "./TreeNode";
 
 type Props = {
   value: unknown;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
+  selectedPath: string;
+  onSelectPath: (path: string) => void;
 };
 
-export default function TreeView({ value }: Props) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPath, setSelectedPath] = useState<string>("Root");
+export default function TreeView({
+  value,
+  searchTerm,
+  onSearchTermChange,
+  selectedPath,
+  onSelectPath,
+}: Props) {
+  // const [selectedPath, setSelectedPath] = useState<string>("Root");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
   // toggle a single path
@@ -106,13 +115,14 @@ export default function TreeView({ value }: Props) {
           type="text"
           placeholder="Search keys or values..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          // onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => onSearchTermChange(e.target.value)}
           className="w-full p-2 border rounded"
         />
         {searchTerm && (
           <button
             className="relative right-8"
-            onClick={() => setSearchTerm("")}
+            onClick={() => onSearchTermChange("")}
           >
             &#x2715;
           </button>
@@ -151,7 +161,7 @@ export default function TreeView({ value }: Props) {
           depth={0}
           path="Root"
           selectedPath={selectedPath}
-          onSelectPath={setSelectedPath}
+          onSelectPath={onSelectPath}
           searchTerm={searchTerm}
           expandedPaths={new Set([...expandedPaths, ...autoExpandedPaths])}
           togglePath={togglePath}
