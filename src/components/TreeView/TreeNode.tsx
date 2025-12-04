@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { isPlainObject } from "../../lib/jsonUtils";
 
 type Props = {
@@ -8,60 +8,163 @@ type Props = {
   path: string;
   selectedPath: string;
   onSelectPath: (p: string) => void;
+  searchTerm: string;
 };
 
-export function TreeNode({
+export default function TreeNode({
   name,
   value,
   depth,
   path,
   selectedPath,
   onSelectPath,
+  searchTerm,
 }: Props) {
-  const [open, setOpen] = useState(true);
+  // Determine whether this node is "expandable" (object or array)
+  const isExpandable = typeof value === "object" && value !== null;
 
+  // Helper: primitive string to display
+  const valueAsString = useMemo(() => {
+    if (typeof value === "string") return `"${value}"`;
+    if (value === null) return "null";
+    if (typeof value === "undefined") return "undefined";
+    if (typeof value === "object") return null;
+    return String(value);
+  }, [value]);
+
+  // Search matching logic
+  const term = searchTerm.trim().toLowerCase();
+  const keyMatches = term.length > 0 && name.toLowerCase().includes(term);
+  const valueMatches =
+    term.length > 0 &&
+    valueAsString !== null &&
+    valueAsString.toLowerCase().includes(term);
+
+  const thisNodeMatches = keyMatches || valueMatches;
+
+  // Recursive helper to check whether subtree contains the search term.
+  // We keep this function pure and independent of component state.
+  function subtreeContainsMatch(
+    v: unknown,
+    nodeName: string,
+    q: string
+  ): boolean {
+    if (!q) return false;
+    const lower = q.toLowerCase();
+
+    // Check current node name
+    if (nodeName.toLowerCase().includes(lower)) return true;
+
+    // Primitive value check
+    if (v === null) {
+      if ("null".includes(lower)) return true;
+      return false;
+    }
+    if (typeof v !== "object") {
+      if (String(v).toLowerCase().includes(lower)) return true;
+      return false;
+    }
+
+    // Array
+    if (Array.isArray(v)) {
+      for (let i = 0; i < v.length; i++) {
+        if (subtreeContainsMatch(v[i], String(i), q)) return true;
+      }
+      return false;
+    }
+
+    // Plain object
+    if (isPlainObject(v)) {
+      for (const [k, val] of Object.entries(v)) {
+        if (subtreeContainsMatch(val, k, q)) return true;
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  const subtreeHasMatch = useMemo(
+    () => subtreeContainsMatch(value, name, term),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [value, name, term]
+  );
+
+  // open state: auto-open if there's a search term that matches inside
+  const [open, setOpen] = useState<boolean>(!!subtreeHasMatch);
+
+  // When searchTerm changes, force-open matching branches.
+  useEffect(() => {
+    if (term) {
+      setOpen(subtreeHasMatch);
+    }
+    // when search cleared, keep the user's open/close preference (don't auto-collapse)
+    // If you prefer to collapse when search cleared, uncomment next line:
+    // else setOpen(false);
+  }, [term, subtreeHasMatch]);
+
+  // Selected highlight
   const isSelected = selectedPath === path;
-  const nodeBg = isSelected ? "bg-blue-100" : "";
-  const hoverBg = isSelected ? "" : "hover:bg-gray-50";
 
-  // Node label line
-  const handleSelect = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Styling classes
+  const baseLineClasses =
+    "flex items-center cursor-pointer select-none rounded px-1";
+  const selectedClass = isSelected ? "bg-blue-100" : "";
+  const hoverClass = !isSelected ? "hover:bg-gray-50" : "";
+  const matchHighlightClass = thisNodeMatches ? "bg-yellow-200" : "";
+
+  // click handler for selecting path
+  function handleSelect(e?: React.MouseEvent) {
+    e?.stopPropagation();
     onSelectPath(path);
-  };
+  }
 
-  const lineClasses = `flex items-center cursor-pointer select-none rounded px-1 ${nodeBg} ${hoverBg}`;
+  // caret click toggles open
+  function toggleOpen(e: React.MouseEvent) {
+    e.stopPropagation();
+    setOpen((s) => !s);
+    onSelectPath(path); // also select when toggling
+  }
 
-  // Primitive
-  if (typeof value !== "object" || value === null) {
+  // Render primitive
+  if (!isExpandable) {
     return (
       <div style={{ paddingLeft: depth * 12 }} className="py-0.5">
-        <div onClick={handleSelect} className={lineClasses}>
-          <span className="text-gray-600">{name}: </span>
-          <span className={primitiveColor(value)}>
-            {formatPrimitive(value)}
+        <div
+          onClick={handleSelect}
+          className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
+        >
+          <span className={`mr-2 text-gray-600 ${matchHighlightClass}`}>
+            {name}:
+          </span>
+          <span className={`${primitiveColor(value)} ${matchHighlightClass}`}>
+            {valueAsString}
           </span>
         </div>
       </div>
     );
   }
 
-  // Array
+  // Render array
   if (Array.isArray(value)) {
     return (
       <div className="py-0.5">
         <div
           style={{ paddingLeft: depth * 12 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(!open);
-            onSelectPath(path);
-          }}
-          className={lineClasses}
+          onClick={handleSelect}
+          className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
         >
-          <span className="mr-1">{open ? "▼" : "▶"}</span>
-          <span className="text-gray-700">
-            {name}: <span className="text-blue-600">Array({value.length})</span>
+          <button
+            onClick={toggleOpen}
+            className="mr-2 text-xs"
+            aria-label={open ? "Collapse" : "Expand"}
+          >
+            {open ? "▼" : "▶"}
+          </button>
+
+          <span className={`${matchHighlightClass}`}>
+            <span className="text-gray-700">{name}:</span>{" "}
+            <span className="text-blue-600">Array({value.length})</span>
           </span>
         </div>
 
@@ -75,13 +178,14 @@ export function TreeNode({
               path={`${path}[${i}]`}
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
+              searchTerm={searchTerm}
             />
           ))}
       </div>
     );
   }
 
-  // Object
+  // Render object
   if (isPlainObject(value)) {
     const entries = Object.entries(value);
 
@@ -89,16 +193,20 @@ export function TreeNode({
       <div className="py-0.5">
         <div
           style={{ paddingLeft: depth * 12 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(!open);
-            onSelectPath(path);
-          }}
-          className={lineClasses}
+          onClick={handleSelect}
+          className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
         >
-          <span className="mr-1">{open ? "▼" : "▶"}</span>
-          <span className="text-gray-700">
-            {name}: <span className="text-green-700">{`{…}`}</span>
+          <button
+            onClick={toggleOpen}
+            className="mr-2 text-xs"
+            aria-label={open ? "Collapse" : "Expand"}
+          >
+            {open ? "▼" : "▶"}
+          </button>
+
+          <span className={`${matchHighlightClass}`}>
+            <span className="text-gray-700">{name}:</span>{" "}
+            <span className="text-green-700">{`{…}`}</span>
           </span>
         </div>
 
@@ -112,32 +220,28 @@ export function TreeNode({
               path={`${path}.${k}`}
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
+              searchTerm={searchTerm}
             />
           ))}
       </div>
     );
   }
 
-  // fallback
+  // Fallback (shouldn't happen)
   return (
     <div style={{ paddingLeft: depth * 12 }} className="py-0.5">
-      <div onClick={handleSelect} className={lineClasses}>
-        <span className="text-gray-600">{name}: </span>
+      <div
+        onClick={handleSelect}
+        className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
+      >
+        <span className="text-gray-600">{name}:</span>
         <span className="text-gray-800">unknown</span>
       </div>
     </div>
   );
 }
 
-//
-// Helpers
-//
-
-function formatPrimitive(v: unknown) {
-  if (typeof v === "string") return `"${v}"`;
-  if (v === null) return "null";
-  return String(v);
-}
+/* Helpers */
 
 function primitiveColor(v: unknown) {
   switch (typeof v) {
