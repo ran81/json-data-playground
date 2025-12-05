@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useSimpleFocusTrap } from "../hooks/useSimpleFocusTrap";
 
 type ModalProps = {
   open: boolean;
@@ -7,6 +8,16 @@ type ModalProps = {
 };
 
 function ImportModal({ open, onClose, onImport }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (modalRef.current && open) {
+      modalRef.current.focus();
+    }
+  }, [open]);
+
+  useSimpleFocusTrap(modalRef, open);
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -36,7 +47,13 @@ function ImportModal({ open, onClose, onImport }: ModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl p-6 w-96">
+      <div
+        ref={modalRef}
+        className="bg-white rounded-xl shadow-xl p-6 w-96"
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+      >
         <h2 className="text-xl font-bold mb-4">Import JSON</h2>
         <p className="text-sm text-gray-600 mb-4">
           Choose a <code>.json</code> file from your computer.
