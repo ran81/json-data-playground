@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { parseJson } from "../lib/parseJson";
 
 export function useJsonState() {
-  const [text, setRawText] = useState("");
+  const saved = localStorage.getItem("json-playground-value");
+  const [text, setRawText] = useState(saved ?? "");
   const [stats, setStats] = useState({ chars: 0, lines: 1, bytes: 0 });
 
   const setText = (newText: string) => {

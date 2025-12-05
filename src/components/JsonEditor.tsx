@@ -85,6 +85,25 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
         >
           Sample JSON
         </button>
+
+        <div className="flex gap-2 ml-auto">
+          <button
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+            onClick={() => localStorage.setItem("json-playground-value", value)}
+          >
+            Save
+          </button>
+
+          <button
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            onClick={() => {
+              const stored = localStorage.getItem("json-playground-value");
+              if (stored != null) onChange(stored);
+            }}
+          >
+            Load
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 border rounded overflow-hidden">
