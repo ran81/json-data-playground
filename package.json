@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@monaco-editor/react": "^4.7.0",
     "json-to-ts": "^2.1.0",
     "prism-react-renderer": "^2.4.1",

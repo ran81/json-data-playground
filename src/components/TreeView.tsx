@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TreeNode from "./TreeNode";
+import SelectedPathPanel from "./SelectedPathPanel";
 
 type Props = {
   value: unknown;
@@ -164,10 +165,7 @@ export default function TreeView({
       </div>
 
       {/* Selected path panel */}
-      <div className="bg-gray-100 p-2 rounded border text-gray-700">
-        <div className="font-semibold text-gray-800 mb-1">Selected Path</div>
-        <div className="break-all text-sm">{selectedPath}</div>
-      </div>
+      <SelectedPathPanel selectedPath={selectedPath} />
 
       {/* Tree root */}
       <div className="bg-white border rounded p-2">
