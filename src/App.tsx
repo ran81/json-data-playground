@@ -19,7 +19,7 @@ function App() {
   return (
     <div className="w-full h-screen flex flex-col bg-gray-50">
       {/* Title */}
-      <header className="p-4 border-b border-gray-200 bg-white">
+      <header className="p-4 border-b border-gray-200 bg-white shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800">
           JSON Data Playground
         </h1>
@@ -31,7 +31,7 @@ function App() {
       {/* Main content */}
       <div className="flex flex-1">
         {/* Left panel */}
-        <div className="w-1/2 h-full border-r border-gray-200 p-4 flex flex-col gap-4">
+        <div className="w-1/2 border-r border-gray-200 p-4 flex flex-col gap-4 h-[91vh]">
           <JsonEditor value={text} onChange={setText} onClear={handleClear} />
         </div>
 

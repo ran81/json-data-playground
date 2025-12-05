@@ -95,7 +95,6 @@ export default function JsonEditor({ value, onChange, onClear }: Props) {
           onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
-            scrollBeyondLastLine: false,
             automaticLayout: true,
             wordWrap: "on",
           }}
