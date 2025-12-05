@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useJsonState } from "./hooks/useJsonState";
 import JsonEditor from "./components/JsonEditor";
 import ErrorBox from "./components/ErrorBox";
@@ -7,12 +7,26 @@ import TreeView from "./components/TreeView";
 
 function App() {
   const { text, setText, parsedJson, error, stats } = useJsonState();
-  const [searchTerm, setSearchTerm] = useState("");
+
+  // immediate input value shown in the search box
+  const [inputSearch, setInputSearch] = useState("");
+
+  // debounced value used by TreeView
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [selectedPath, setSelectedPath] = useState("Root");
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setDebouncedSearch(inputSearch);
+    }, 200); // debounce delay
+
+    return () => clearTimeout(id);
+  }, [inputSearch]);
 
   const handleClear = () => {
     setText("");
-    setSearchTerm("");
+    setInputSearch("");
     setSelectedPath("Root");
   };
 
@@ -45,8 +59,11 @@ function App() {
           <ErrorBox error={error} />
           <TreeView
             value={parsedJson}
-            searchTerm={searchTerm}
-            onSearchTermChange={setSearchTerm}
+            // show immediate input in the search box
+            searchInputValue={inputSearch}
+            onSearchInputChange={setInputSearch}
+            // pass debounced value to drive tree behavior
+            searchTerm={debouncedSearch}
             selectedPath={selectedPath}
             onSelectPath={setSelectedPath}
           />

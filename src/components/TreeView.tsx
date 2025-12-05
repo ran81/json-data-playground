@@ -3,8 +3,9 @@ import TreeNode from "./TreeNode";
 
 type Props = {
   value: unknown;
-  searchTerm: string;
-  onSearchTermChange: (term: string) => void;
+  searchInputValue: string; // immediate input shown in box
+  onSearchInputChange: (v: string) => void; // updates inputValue
+  searchTerm: string; // debounced term used for tree logic
   selectedPath: string;
   onSelectPath: (path: string) => void;
 };
@@ -12,11 +13,11 @@ type Props = {
 export default function TreeView({
   value,
   searchTerm,
-  onSearchTermChange,
+  searchInputValue,
+  onSearchInputChange,
   selectedPath,
   onSelectPath,
 }: Props) {
-  // const [selectedPath, setSelectedPath] = useState<string>("Root");
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
   // toggle a single path
@@ -114,15 +115,14 @@ export default function TreeView({
         <input
           type="text"
           placeholder="Search keys or values..."
-          value={searchTerm}
-          // onChange={(e) => setSearchTerm(e.target.value)}
-          onChange={(e) => onSearchTermChange(e.target.value)}
+          value={searchInputValue}
+          onChange={(e) => onSearchInputChange(e.target.value)}
           className="w-full p-2 border rounded"
         />
         {searchTerm && (
           <button
             className="relative right-8"
-            onClick={() => onSearchTermChange("")}
+            onClick={() => onSearchInputChange("")}
           >
             &#x2715;
           </button>
