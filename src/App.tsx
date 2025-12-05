@@ -6,7 +6,7 @@ import TypeOutput from "./components/TypeOutput";
 import TreeView from "./components/TreeView";
 
 function App() {
-  const { text, setText, parsedJson, error } = useJsonState();
+  const { text, setText, parsedJson, error, stats } = useJsonState();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPath, setSelectedPath] = useState("Root");
 
@@ -32,7 +32,12 @@ function App() {
       <div className="flex flex-1">
         {/* Left panel */}
         <div className="w-1/2 border-r border-gray-200 p-4 flex flex-col gap-4 h-[91vh]">
-          <JsonEditor value={text} onChange={setText} onClear={handleClear} />
+          <JsonEditor
+            value={text}
+            onChange={setText}
+            onClear={handleClear}
+            stats={stats}
+          />
         </div>
 
         {/* Right panel */}

@@ -6,6 +6,7 @@ type Props = {
   value: string;
   onChange: (val: string) => void;
   onClear?: () => void;
+  stats: Record<string, number>;
 };
 
 const sampleJson = `{
@@ -16,7 +17,7 @@ const sampleJson = `{
   "active": true
 }`;
 
-export default function JsonEditor({ value, onChange, onClear }: Props) {
+export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({
     line: 1,
@@ -100,9 +101,26 @@ export default function JsonEditor({ value, onChange, onClear }: Props) {
           }}
         />
       </div>
-      <div className="h-6 text-sm text-gray-500 flex justify-end items-center px-2 border-t border-gray-200">
-        Ln {cursorPos.line}, Col {cursorPos.column}
+
+      <div className="h-6 text-xs text-gray-500 flex justify-between items-center px-2 border-t border-gray-200">
+        {/* Left side: JSON metadata */}
+        <div className="flex gap-3">
+          <span>Lines: {stats.lines}</span>
+          <span>Chars: {stats.chars}</span>
+          <span>Size: {formatBytes(stats.bytes)}</span>
+        </div>
+
+        {/* Right side: Cursor position */}
+        <div>
+          Ln {cursorPos.line}, Col {cursorPos.column}
+        </div>
       </div>
     </div>
   );
+}
+
+function formatBytes(num: number) {
+  if (num < 1024) return `${num} B`;
+  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
 }
