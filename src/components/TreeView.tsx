@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import TreeNode from "./TreeNode";
 
 type Props = {
@@ -19,6 +19,21 @@ export default function TreeView({
   onSelectPath,
 }: Props) {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ctrl+F or Cmd+F
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault(); // prevent browser find
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select(); // optional: select text
+      }
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   // toggle a single path
   const togglePath = useCallback((p: string) => {
@@ -113,6 +128,7 @@ export default function TreeView({
       {/* Search input */}
       <div className="flex relative gap-2">
         <input
+          ref={searchInputRef}
           type="text"
           placeholder="Search keys or values..."
           value={searchInputValue}
