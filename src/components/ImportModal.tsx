@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useSimpleFocusTrap } from "../hooks/useSimpleFocusTrap";
 
-type ModalProps = {
+type Props = {
   open: boolean;
   onClose: () => void;
   onImport: (s: string) => void;
 };
 
-function ImportModal({ open, onClose, onImport }: ModalProps) {
+function ImportModal({ open, onClose, onImport }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +31,9 @@ function ImportModal({ open, onClose, onImport }: ModalProps) {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     try {
       const text = await file.text();

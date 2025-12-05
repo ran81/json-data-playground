@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 import TreeNode from "./TreeNode";
 import SelectedPathPanel from "./SelectedPathPanel";
 
@@ -142,7 +143,7 @@ export default function TreeView({
             className="relative right-8"
             onClick={() => onSearchInputChange("")}
           >
-            &#x2715;
+            <XMarkIcon className="w-4 h-4" />
           </button>
         )}
 

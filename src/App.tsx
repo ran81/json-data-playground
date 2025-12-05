@@ -48,7 +48,7 @@ function App() {
         {/* Left panel */}
         <div
           style={{ width: `${leftWidth}%` }}
-          className="border-r border-gray-200 p-4 flex flex-col gap-4 h-[91vh]"
+          className="border-r border-gray-200 p-4 flex flex-col gap-4 h-[90vh]"
         >
           <JsonEditor
             value={text}

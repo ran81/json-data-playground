@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ClipboardIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 function SelectedPathPanel({
   selectedPath,
@@ -31,7 +32,7 @@ function SelectedPathPanel({
               className="text-gray-500 hover:text-gray-700 p-0.5 rounded"
               aria-label="Clear selected path"
             >
-              ×
+              <XMarkIcon className="w-4 h-4" />
             </button>
           )}
         </div>

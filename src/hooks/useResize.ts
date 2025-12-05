@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 
-interface UseResizeOptions {
+type UseResizeOptions = {
   initialWidth?: number; // in percentage
   minWidth?: number; // in percentage
   maxWidth?: number; // in percentage
-}
+};
 
 export function useResize({
   initialWidth = 50,

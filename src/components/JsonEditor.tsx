@@ -26,7 +26,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
     column: 1,
   });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragError, setDragError] = useState<string | null>(null); // new state
+  const [dragError, setDragError] = useState<string | null>(null);
   const errorTimeoutRef = useRef<number | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -41,7 +41,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
 
   const showThenHideError = (error: string) => {
     setDragError(error);
-    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     errorTimeoutRef.current = setTimeout(() => {
       setDragError(null);
       errorTimeoutRef.current = null;
@@ -55,7 +57,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
       setDragError(null);
 
       const file = e.dataTransfer.files[0];
-      if (!file) return;
+      if (!file) {
+        return;
+      }
 
       if (!file.type.includes("json")) {
         showThenHideError("Please drop a valid JSON file.");
@@ -86,7 +90,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   };
 
   const handleFormat = () => {
-    if (!editorRef.current) return;
+    if (!editorRef.current) {
+      return;
+    }
     if (!value.trim()) {
       return;
     }
@@ -113,7 +119,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   };
 
   const handleChange: OnChange = (val) => {
-    if (val !== undefined) onChange(val);
+    if (val !== undefined) {
+      onChange(val);
+    }
   };
 
   return (
@@ -225,7 +233,11 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
 }
 
 function formatBytes(num: number) {
-  if (num < 1024) return `${num} B`;
-  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  if (num < 1024) {
+    return `${num} B`;
+  }
+  if (num < 1024 * 1024) {
+    return `${(num / 1024).toFixed(1)} KB`;
+  }
   return `${(num / (1024 * 1024)).toFixed(1)} MB`;
 }

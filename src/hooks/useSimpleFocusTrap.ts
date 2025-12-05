@@ -28,7 +28,9 @@ export function useSimpleFocusTrap(
     if (!container) return;
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab") {
+        return;
+      }
 
       const focusable = getFocusable(container);
       const first = focusable[0];

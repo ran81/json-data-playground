@@ -175,14 +175,6 @@ export default function TreeNode({
   );
 }
 
-function getPrimitiveString(value: unknown) {
-  if (typeof value === "string") return `"${value}"`;
-  if (value === null) return "null";
-  if (typeof value === "undefined") return "undefined";
-  if (typeof value === "object") return null;
-  return String(value);
-}
-
 /* Helpers */
 
 function primitiveColor(v: unknown) {
@@ -196,4 +188,12 @@ function primitiveColor(v: unknown) {
     default:
       return "text-gray-800";
   }
+}
+
+function getPrimitiveString(value: unknown) {
+  if (typeof value === "string") return `"${value}"`;
+  if (value === null) return "null";
+  if (typeof value === "undefined") return "undefined";
+  if (typeof value === "object") return null;
+  return String(value);
 }

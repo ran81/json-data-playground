@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { inferType } from "../lib/inferType";
 import { renderTs } from "../lib/renderTs";
 
@@ -6,6 +7,13 @@ type Props = {
 };
 
 export default function TypeOutput({ value }: Props) {
+  const output = useMemo(() => {
+    if (value === null) return null;
+
+    const typeAst = inferType(value);
+    return renderTs("Root", typeAst);
+  }, [value]);
+
   if (value === null) {
     return (
       <div className="p-3 bg-white border rounded shadow-sm">
@@ -14,9 +22,6 @@ export default function TypeOutput({ value }: Props) {
       </div>
     );
   }
-
-  const typeAst = inferType(value);
-  const output = renderTs("Root", typeAst);
 
   return (
     <div className="p-3 bg-white border rounded shadow-sm">
