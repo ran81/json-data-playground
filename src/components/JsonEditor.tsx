@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { editor } from "monaco-editor";
 import Editor, { type OnChange } from "@monaco-editor/react";
 import ImportModal from "./ImportModal";
@@ -20,12 +20,61 @@ const sampleJson = `{
 
 export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({
     line: 1,
     column: 1,
   });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragError, setDragError] = useState<string | null>(null); // new state
+  const errorTimeoutRef = useRef<number | null>(null);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+    setDragError(null);
+  }, []);
+
+  const showThenHideError = (error: string) => {
+    setDragError(error);
+    if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    errorTimeoutRef.current = setTimeout(() => {
+      setDragError(null);
+      errorTimeoutRef.current = null;
+    }, 3000);
+  };
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      setDragError(null);
+
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+
+      if (!file.type.includes("json")) {
+        showThenHideError("Please drop a valid JSON file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result;
+        if (typeof text === "string") {
+          onChange(text);
+        } else {
+          showThenHideError("Unable to read file content.");
+        }
+      };
+      reader.readAsText(file);
+    },
+    [onChange]
+  );
 
   const handleEditorDidMount = (
     editorInstance: editor.IStandaloneCodeEditor
@@ -115,7 +164,15 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 border rounded overflow-hidden">
+      {/* Editor area with drag-and-drop */}
+      <div
+        className={`flex-1 border rounded overflow-hidden relative ${
+          isDragging ? "border-blue-500 bg-blue-50" : ""
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <Editor
           height="100%"
           defaultLanguage="json"
@@ -128,6 +185,20 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
             wordWrap: "on",
           }}
         />
+
+        {/* Optional overlay when dragging */}
+        {isDragging && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-700 font-semibold bg-blue-100 bg-opacity-30">
+            Drop JSON file here
+          </div>
+        )}
+
+        {/* Drag error message */}
+        {dragError && (
+          <div className="absolute bottom-2 left-2 text-red-600 text-sm bg-red-100 px-2 py-1 rounded shadow-sm">
+            {dragError}
+          </div>
+        )}
       </div>
 
       <div className="h-6 text-xs text-gray-500 flex justify-between items-center px-2 border-t border-gray-200">
