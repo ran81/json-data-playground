@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { editor } from "monaco-editor";
 import Editor, { type OnChange } from "@monaco-editor/react";
+import ImportModal from "./ImportModal";
 
 type Props = {
   value: string;
@@ -18,6 +19,8 @@ const sampleJson = `{
 }`;
 
 export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({
     line: 1,
@@ -88,7 +91,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
 
         <div className="flex gap-2 ml-auto">
           <button
-            className="px-3 py-1 bg-blue-600 text-white rounded"
+            className="px-3 py-1 bg-green-600 text-white rounded"
             onClick={() => localStorage.setItem("json-playground-value", value)}
           >
             Save
@@ -102,6 +105,12 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
             }}
           >
             Load
+          </button>
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="px-3 py-1 bg-blue-600 text-white rounded"
+          >
+            Import JSON
           </button>
         </div>
       </div>
@@ -134,6 +143,12 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           Ln {cursorPos.line}, Col {cursorPos.column}
         </div>
       </div>
+
+      <ImportModal
+        open={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={(jsonText) => onChange(jsonText)}
+      />
     </div>
   );
 }
