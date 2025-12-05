@@ -165,7 +165,10 @@ export default function TreeView({
       </div>
 
       {/* Selected path panel */}
-      <SelectedPathPanel selectedPath={selectedPath} />
+      <SelectedPathPanel
+        selectedPath={selectedPath}
+        changeSelectedPath={onSelectPath}
+      />
 
       {/* Tree root */}
       <div className="bg-white border rounded p-2">
