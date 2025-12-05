@@ -19,7 +19,7 @@ function App() {
   useEffect(() => {
     const id = setTimeout(() => {
       setDebouncedSearch(inputSearch);
-    }, 200); // debounce delay
+    }, 200);
 
     return () => clearTimeout(id);
   }, [inputSearch]);
@@ -34,9 +34,7 @@ function App() {
     <div className="w-full h-screen flex flex-col bg-gray-50">
       {/* Title */}
       <header className="p-4 border-b border-gray-200 bg-white shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800">
-          JSON Data Playground
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800">JSON Playground</h1>
         <p className="text-sm text-gray-500 mt-1">
           Edit, explore, and visualize JSON data in real time
         </p>
