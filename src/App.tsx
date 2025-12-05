@@ -4,6 +4,7 @@ import JsonEditor from "./components/JsonEditor";
 import ErrorBox from "./components/ErrorBox";
 import TypeOutput from "./components/TypeOutput";
 import TreeView from "./components/TreeView";
+import { useResize } from "./hooks/useResize";
 
 function App() {
   const { text, setText, parsedJson, error, stats } = useJsonState();
@@ -15,6 +16,8 @@ function App() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [selectedPath, setSelectedPath] = useState("Root");
+
+  const { width: leftWidth, startResize } = useResize({ initialWidth: 50 });
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -41,9 +44,12 @@ function App() {
       </header>
 
       {/* Main content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
         {/* Left panel */}
-        <div className="w-1/2 border-r border-gray-200 p-4 flex flex-col gap-4 h-[91vh]">
+        <div
+          style={{ width: `${leftWidth}%` }}
+          className="border-r border-gray-200 p-4 flex flex-col gap-4 h-[91vh]"
+        >
           <JsonEditor
             value={text}
             onChange={setText}
@@ -52,8 +58,22 @@ function App() {
           />
         </div>
 
+        {/* Drag handle */}
+        <div
+          onMouseDown={startResize}
+          onTouchStart={startResize}
+          onMouseDownCapture={(e) => e.preventDefault()} // prevents text selection jump
+          onTouchStartCapture={(e) => e.preventDefault()}
+          className="w-1 cursor-col-resize bg-gray-300 hover:bg-gray-400"
+        />
+
         {/* Right panel */}
-        <div className="w-1/2 h-full p-4 overflow-y-auto flex flex-col gap-4">
+        <div
+          style={{
+            width: `${100 - leftWidth}%`,
+          }}
+          className="h-full p-4 overflow-y-auto flex flex-col gap-4"
+        >
           <ErrorBox error={error} />
           <TreeView
             value={parsedJson}
