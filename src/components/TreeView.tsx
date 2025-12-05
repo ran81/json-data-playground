@@ -21,6 +21,7 @@ export default function TreeView({
 }: Props) {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const matchCount = countTreeMatches(value, "root", searchTerm);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -170,6 +171,11 @@ export default function TreeView({
         changeSelectedPath={onSelectPath}
       />
 
+      <div className="flex items-center justify-between px-2 text-sm text-gray-600">
+        <span>Tree</span>
+        {searchTerm && <span>Matches: {matchCount}</span>}
+      </div>
+
       {/* Tree root */}
       <div className="bg-white border rounded p-2">
         <TreeNode
@@ -186,4 +192,35 @@ export default function TreeView({
       </div>
     </div>
   );
+}
+
+function countTreeMatches(value: unknown, name: string, term: string): number {
+  if (!term) return 0;
+  const lowerTerm = term.toLowerCase();
+
+  let count = 0;
+
+  // Check key
+  if (name.toLowerCase().includes(lowerTerm)) count += 1;
+
+  // Check value (primitive only)
+  const valueAsString =
+    value !== null && typeof value !== "object" ? String(value) : null;
+  if (valueAsString && valueAsString.toLowerCase().includes(lowerTerm))
+    count += 1;
+
+  // Recurse into arrays
+  if (Array.isArray(value)) {
+    value.forEach((v, i) => {
+      count += countTreeMatches(v, String(i), term);
+    });
+  }
+  // Recurse into objects
+  else if (value && typeof value === "object") {
+    Object.entries(value).forEach(([k, v]) => {
+      count += countTreeMatches(v, k, term);
+    });
+  }
+
+  return count;
 }
