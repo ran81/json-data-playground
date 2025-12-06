@@ -129,19 +129,19 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
       <div className="flex gap-2 mb-2">
         <button
           onClick={handleFormat}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
         >
           Format
         </button>
         <button
           onClick={handleClear}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
         >
           Clear
         </button>
         <button
           onClick={handleSample}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
         >
           Sample JSON
         </button>
@@ -155,7 +155,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           </button>
 
           <button
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
             onClick={() => {
               const stored = localStorage.getItem("json-playground-value");
               if (stored != null) onChange(stored);
@@ -188,7 +188,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           onChange={handleChange}
           onMount={handleEditorDidMount}
           options={{
-            minimap: { enabled: false },
+            minimap: { enabled: true },
             automaticLayout: true,
             wordWrap: "on",
           }}

@@ -11,7 +11,9 @@ function SelectedPathPanel({
   return (
     <div className="bg-gray-100 p-2 rounded border text-gray-700 relative">
       <div className="flex justify-between">
-        <h2 className="font-semibold text-gray-800 mb-1">Selected Path</h2>
+        <h2 className="font-semibold text-gray-800 mb-1 font-sans">
+          Selected Path
+        </h2>
         <CopyButton text={selectedPath} tooltip="Copy path" />
       </div>
 

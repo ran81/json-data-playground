@@ -127,7 +127,7 @@ export default function TreeView({
   }, [value, searchTerm]);
 
   return (
-    <div className="font-mono text-sm p-2 space-y-3">
+    <div className="font-mono p-2 space-y-3">
       {/* Search input */}
       <div className="flex relative gap-2">
         <input
@@ -147,10 +147,10 @@ export default function TreeView({
           </button>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 text-sm">
           <button
             onClick={expandAll}
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
             title="Expand all nodes"
           >
             Expand All
@@ -158,7 +158,7 @@ export default function TreeView({
 
           <button
             onClick={collapseAll}
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
             title="Collapse all nodes"
           >
             Collapse All
@@ -173,12 +173,11 @@ export default function TreeView({
       />
 
       <div className="flex items-center justify-between px-2 text-sm text-gray-600">
-        <span>Tree</span>
-        {searchTerm && <span>Matches: {matchCount}</span>}
+        {searchTerm && <span className="ml-auto">Matches: {matchCount}</span>}
       </div>
 
       {/* Tree root */}
-      <div className="bg-white border rounded p-2 max-h-[60vh] overflow-auto">
+      <div className="bg-white border rounded p-2 max-h-[60vh] overflow-auto text-sm">
         <TreeNode
           name="Root"
           value={value}
