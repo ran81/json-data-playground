@@ -8,6 +8,7 @@ type Props = {
   onChange: (val: string) => void;
   onClear?: () => void;
   stats: Record<string, number>;
+  darkMode: boolean;
 };
 
 const sampleJson = `{
@@ -18,7 +19,13 @@ const sampleJson = `{
   "active": true
 }`;
 
-export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
+export default function JsonEditor({
+  value,
+  onChange,
+  onClear,
+  stats,
+  darkMode,
+}: Props) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const [cursorPos, setCursorPos] = useState<{ line: number; column: number }>({
@@ -131,33 +138,33 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
       <div className="flex flex-wrap gap-2 mb-1">
         <button
           onClick={handleFormat}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
+          className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150 shadow-sm text-gray-800 dark:text-gray-100"
         >
           Format
         </button>
         <button
           onClick={handleClear}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
+          className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150 shadow-sm text-gray-800 dark:text-gray-100"
         >
           Clear
         </button>
         <button
           onClick={handleSample}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
+          className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150 shadow-sm text-gray-800 dark:text-gray-100"
         >
           Sample JSON
         </button>
 
         <div className="flex gap-2 ml-auto flex-wrap">
           <button
-            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-150 shadow-sm"
+            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 dark:hover:bg-green-500 transition-colors duration-150 shadow-sm"
             onClick={() => localStorage.setItem("json-playground-value", value)}
           >
             Save
           </button>
 
           <button
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
+            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150 shadow-sm text-gray-800 dark:text-gray-100"
             onClick={() => {
               const stored = localStorage.getItem("json-playground-value");
               if (stored != null) onChange(stored);
@@ -167,7 +174,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           </button>
           <button
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-150 shadow-sm"
+            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors duration-150 shadow-sm"
           >
             Import JSON
           </button>
@@ -177,7 +184,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
       {/* Editor area with drag-and-drop */}
       <div
         className={`flex-1 border rounded-lg overflow-hidden relative transition-colors duration-150 ${
-          isDragging ? "border-blue-500 bg-blue-50" : "bg-white"
+          isDragging
+            ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
+            : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -189,6 +198,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           value={value}
           onChange={handleChange}
           onMount={handleEditorDidMount}
+          theme={darkMode ? "vs-dark" : "vs"}
           options={{
             minimap: { enabled: true },
             automaticLayout: true,
@@ -198,21 +208,21 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
 
         {/* Overlay when dragging */}
         {isDragging && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-700 font-semibold bg-blue-100 bg-opacity-30 rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-700 dark:text-blue-300 font-semibold bg-blue-100 dark:bg-blue-900 bg-opacity-30 dark:bg-opacity-40 rounded-lg">
             Drop JSON file here
           </div>
         )}
 
         {/* Drag error message */}
         {dragError && (
-          <div className="absolute bottom-2 left-2 text-red-600 text-sm bg-red-100 px-2 py-1 rounded shadow-sm">
+          <div className="absolute bottom-2 left-2 text-red-600 dark:text-red-400 text-sm bg-red-100 dark:bg-red-800 bg-opacity-50 dark:bg-opacity-50 px-2 py-1 rounded shadow-sm">
             {dragError}
           </div>
         )}
       </div>
 
       {/* Status bar */}
-      <div className="h-6 text-xs text-gray-500 flex justify-between items-center px-2 border-t border-gray-200">
+      <div className="h-6 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center px-2 border-t border-gray-200 dark:border-gray-700">
         <div className="flex gap-3">
           <span>Lines: {stats.lines}</span>
           <span>Chars: {stats.chars}</span>

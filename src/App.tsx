@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useJsonState } from "./hooks/useJsonState";
+import { useResize } from "./hooks/useResize";
 import JsonEditor from "./components/JsonEditor";
 import ErrorBox from "./components/ErrorBox";
 import TypeOutput from "./components/TypeOutput";
 import TreeView from "./components/TreeView";
-import { useResize } from "./hooks/useResize";
+
+const LS_KEY = "json_playground__dark-mode";
 
 function App() {
   const { text, setText, parsedJson, error, stats } = useJsonState();
+
+  const { width: leftWidth, startResize } = useResize({ initialWidth: 50 });
 
   // immediate input value shown in the search box
   const [inputSearch, setInputSearch] = useState("");
@@ -17,7 +21,39 @@ function App() {
 
   const [selectedPath, setSelectedPath] = useState("Root");
 
-  const { width: leftWidth, startResize } = useResize({ initialWidth: 50 });
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      // If window is undefined (SSR), default to false
+      if (typeof window === "undefined") return false;
+
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved !== null) return saved === "true";
+
+      // fallback to system preference
+      return window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? true
+        : false;
+    } catch {
+      return false;
+    }
+  });
+
+  // Apply body class and persist to localStorage when darkMode changes
+  useEffect(() => {
+    try {
+      if (darkMode) document.body.classList.add("dark");
+      else document.body.classList.remove("dark");
+
+      localStorage.setItem(LS_KEY, String(darkMode));
+    } catch {
+      // ignore (e.g. storage disabled)
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((d) => !d);
+  };
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -34,27 +70,40 @@ function App() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-gray-50">
+    <div className="w-full h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Title */}
-      <header className="p-4 border-b border-gray-200 bg-white shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800">JSON Playground</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Edit, explore, and visualize JSON data in real time
-        </p>
+      <header className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+            JSON Playground
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Edit, explore, and visualize JSON data in real time
+          </p>
+        </div>
+
+        <button
+          onClick={toggleDarkMode}
+          className="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? "🌞" : "🌙"}
+        </button>
       </header>
 
       {/* Main content */}
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 relative bg-gray-50 dark:bg-gray-900">
         {/* Left panel */}
         <div
           style={{ width: `${leftWidth}%` }}
-          className="border-r border-gray-200 p-4 flex flex-col gap-4 h-[89vh]"
+          className="border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-4 h-[89vh] bg-gray-50 dark:bg-gray-900"
         >
           <JsonEditor
             value={text}
             onChange={setText}
             onClear={handleClear}
             stats={stats}
+            darkMode={darkMode}
           />
         </div>
 
@@ -64,7 +113,7 @@ function App() {
           onTouchStart={startResize}
           onMouseDownCapture={(e) => e.preventDefault()} // prevents text selection jump
           onTouchStartCapture={(e) => e.preventDefault()}
-          className="w-1 cursor-col-resize bg-gray-300 hover:bg-gray-400"
+          className="w-1 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
         />
 
         {/* Right panel */}
@@ -72,15 +121,13 @@ function App() {
           style={{
             width: `${100 - leftWidth}%`,
           }}
-          className="h-full p-4 overflow-y-auto flex flex-col gap-4"
+          className="h-full p-4 overflow-y-auto flex flex-col gap-4 bg-white dark:bg-gray-900"
         >
           <ErrorBox error={error} />
           <TreeView
             value={parsedJson}
-            // show immediate input in the search box
             searchInputValue={inputSearch}
             onSearchInputChange={setInputSearch}
-            // pass debounced value to drive tree behavior
             searchTerm={debouncedSearch}
             selectedPath={selectedPath}
             onSelectPath={setSelectedPath}

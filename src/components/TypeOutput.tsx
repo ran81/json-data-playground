@@ -23,20 +23,28 @@ export default function TypeOutput({ value }: Props) {
 
   if (value === null) {
     return (
-      <div className="p-3 bg-white border rounded shadow-sm">
-        <h2 className="font-semibold mb-2">Inferred Types</h2>
-        <div className="text-gray-500 text-sm">No JSON yet.</div>
+      <div className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-sm">
+        <h2 className="font-semibold mb-2 text-gray-800 dark:text-gray-100">
+          Inferred Types
+        </h2>
+        <div className="text-gray-500 dark:text-gray-400 text-sm">
+          No JSON yet.
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-3 bg-white border rounded shadow-sm">
+    <div className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-sm">
       <div className="flex justify-between">
-        <h2 className="font-semibold mb-2">Inferred Types</h2>
+        <h2 className="font-semibold mb-2 text-gray-800 dark:text-gray-100">
+          Inferred Types
+        </h2>
         <CopyButton text={output!} tooltip="Copy types" />
       </div>
-      <pre className="text-sm text-gray-700 whitespace-pre-wrap">{output}</pre>
+      <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+        {output}
+      </pre>
     </div>
   );
 }

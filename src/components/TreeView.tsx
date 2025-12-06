@@ -127,7 +127,7 @@ export default function TreeView({
   }, [value, searchTerm]);
 
   return (
-    <div className="font-mono p-3 space-y-3 bg-white border rounded-lg shadow-sm">
+    <div className="font-mono p-3 space-y-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
       {/* Search input */}
       <div className="flex gap-2">
         <div className="flex relative w-full">
@@ -137,11 +137,11 @@ export default function TreeView({
             placeholder="Search keys or values..."
             value={searchInputValue}
             onChange={(e) => onSearchInputChange(e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
           {searchTerm && (
             <button
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-150"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150"
               onClick={() => {
                 onSearchInputChange("");
                 searchInputRef.current?.focus();
@@ -155,7 +155,7 @@ export default function TreeView({
         <div className="flex gap-2 ml-2">
           <button
             onClick={expandAll}
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+            className="px-3 py-1 text-gray-800 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150"
             title="Expand all nodes"
           >
             Expand
@@ -163,7 +163,7 @@ export default function TreeView({
 
           <button
             onClick={collapseAll}
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+            className="px-3 py-1 text-gray-800 dark:text-gray-100 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150"
             title="Collapse all nodes"
           >
             Collapse
@@ -179,13 +179,13 @@ export default function TreeView({
 
       {/* Match count */}
       {searchTerm && (
-        <div className="text-sm text-gray-600 text-right">
+        <div className="text-sm text-gray-600 dark:text-gray-400 text-right">
           Matches: {matchCount}
         </div>
       )}
 
       {/* Tree root */}
-      <div className="max-h-[60vh] overflow-auto border rounded-lg p-2 bg-gray-50 text-sm">
+      <div className="max-h-[60vh] overflow-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100">
         <TreeNode
           name="Root"
           value={value}
