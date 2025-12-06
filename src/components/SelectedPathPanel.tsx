@@ -9,22 +9,22 @@ function SelectedPathPanel({
   changeSelectedPath: (p: string) => void;
 }) {
   return (
-    <div className="bg-gray-100 p-2 rounded border text-gray-700 relative">
-      <div className="flex justify-between">
-        <h2 className="font-semibold text-gray-800 mb-1 font-sans">
-          Selected Path
-        </h2>
+    <div className="bg-white border rounded-lg shadow-sm p-3 relative">
+      {/* Header: title + copy button */}
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="font-semibold text-gray-800 font-sans">Selected Path</h2>
         <CopyButton text={selectedPath} tooltip="Copy path" />
       </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex-1 flex items-center gap-2 break-all text-sm">
+      {/* Path display */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex items-center gap-2 break-all text-sm text-gray-700">
           <span>{selectedPath || "-"}</span>
 
           {selectedPath && (
             <button
               onClick={() => changeSelectedPath("")}
-              className="text-gray-500 hover:text-gray-700 p-0.5 rounded"
+              className="text-gray-500 hover:text-gray-700 p-1 rounded transition-colors duration-150"
               aria-label="Clear selected path"
             >
               <XMarkIcon className="w-4 h-4" />

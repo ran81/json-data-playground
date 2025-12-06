@@ -54,9 +54,9 @@ export default function TreeNode({
 
   // Styling classes
   const baseLineClasses =
-    "flex items-center cursor-pointer select-none rounded px-1";
-  const selectedClass = isSelected ? "bg-blue-100" : "";
-  const hoverClass = !isSelected ? "hover:bg-gray-50" : "";
+    "flex items-center cursor-pointer select-none rounded px-2 transition-all duration-150";
+  const selectedClass = isSelected ? "bg-blue-100 shadow-sm" : "";
+  const hoverClass = !isSelected ? "hover:bg-gray-200 hover:shadow-sm" : "";
   const matchHighlightClass = thisNodeMatches ? "bg-yellow-200" : "";
 
   // click handler for selecting path

@@ -125,37 +125,38 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex gap-2 mb-2">
+    <div className="flex flex-col h-full gap-3">
+      {/* Toolbar */}
+      <div className="flex flex-wrap gap-2 mb-1">
         <button
           onClick={handleFormat}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
         >
           Format
         </button>
         <button
           onClick={handleClear}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
         >
           Clear
         </button>
         <button
           onClick={handleSample}
-          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
         >
           Sample JSON
         </button>
 
-        <div className="flex gap-2 ml-auto">
+        <div className="flex gap-2 ml-auto flex-wrap">
           <button
-            className="px-3 py-1 bg-green-600 text-white rounded"
+            className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-150 shadow-sm"
             onClick={() => localStorage.setItem("json-playground-value", value)}
           >
             Save
           </button>
 
           <button
-            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
+            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150 shadow-sm"
             onClick={() => {
               const stored = localStorage.getItem("json-playground-value");
               if (stored != null) onChange(stored);
@@ -165,7 +166,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           </button>
           <button
             onClick={() => setIsImportModalOpen(true)}
-            className="px-3 py-1 bg-blue-600 text-white rounded"
+            className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-150 shadow-sm"
           >
             Import JSON
           </button>
@@ -174,8 +175,8 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
 
       {/* Editor area with drag-and-drop */}
       <div
-        className={`flex-1 border rounded overflow-hidden relative ${
-          isDragging ? "border-blue-500 bg-blue-50" : ""
+        className={`flex-1 border rounded-lg overflow-hidden relative transition-colors duration-150 ${
+          isDragging ? "border-blue-500 bg-blue-50" : "bg-white"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -194,9 +195,9 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
           }}
         />
 
-        {/* Optional overlay when dragging */}
+        {/* Overlay when dragging */}
         {isDragging && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-700 font-semibold bg-blue-100 bg-opacity-30">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-blue-700 font-semibold bg-blue-100 bg-opacity-30 rounded-lg">
             Drop JSON file here
           </div>
         )}
@@ -209,20 +210,20 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
         )}
       </div>
 
+      {/* Status bar */}
       <div className="h-6 text-xs text-gray-500 flex justify-between items-center px-2 border-t border-gray-200">
-        {/* Left side: JSON metadata */}
         <div className="flex gap-3">
           <span>Lines: {stats.lines}</span>
           <span>Chars: {stats.chars}</span>
           <span>Size: {formatBytes(stats.bytes)}</span>
         </div>
 
-        {/* Right side: Cursor position */}
         <div>
           Ln {cursorPos.line}, Col {cursorPos.column}
         </div>
       </div>
 
+      {/* Import modal */}
       <ImportModal
         open={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}

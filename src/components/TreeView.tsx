@@ -127,27 +127,29 @@ export default function TreeView({
   }, [value, searchTerm]);
 
   return (
-    <div className="font-mono p-2 space-y-3">
+    <div className="font-mono p-3 space-y-3 bg-white border rounded-lg shadow-sm">
       {/* Search input */}
-      <div className="flex relative gap-2">
-        <input
-          ref={searchInputRef}
-          type="text"
-          placeholder="Search keys or values..."
-          value={searchInputValue}
-          onChange={(e) => onSearchInputChange(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-        {searchTerm && (
-          <button
-            className="relative right-8"
-            onClick={() => onSearchInputChange("")}
-          >
-            <XMarkIcon className="w-4 h-4" />
-          </button>
-        )}
-
-        <div className="flex gap-2 text-sm">
+      <div className="flex gap-2">
+        <div className="flex relative w-full">
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search keys or values..."
+            value={searchInputValue}
+            onChange={(e) => onSearchInputChange(e.target.value)}
+            className="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+          {searchTerm && (
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-150"
+              onClick={() => onSearchInputChange("")}
+              aria-label="Clear search"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2 ml-2">
           <button
             onClick={expandAll}
             className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
@@ -172,12 +174,15 @@ export default function TreeView({
         changeSelectedPath={onSelectPath}
       />
 
-      <div className="flex items-center justify-between px-2 text-sm text-gray-600">
-        {searchTerm && <span className="ml-auto">Matches: {matchCount}</span>}
-      </div>
+      {/* Match count */}
+      {searchTerm && (
+        <div className="text-sm text-gray-600 text-right">
+          Matches: {matchCount}
+        </div>
+      )}
 
       {/* Tree root */}
-      <div className="bg-white border rounded p-2 max-h-[60vh] overflow-auto text-sm">
+      <div className="max-h-[60vh] overflow-auto border rounded-lg p-2 bg-gray-50 text-sm">
         <TreeNode
           name="Root"
           value={value}
