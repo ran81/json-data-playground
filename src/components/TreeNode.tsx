@@ -56,7 +56,7 @@ export default function TreeNode({
     ? "hover:bg-gray-200 dark:hover:bg-gray-800 hover:shadow-sm"
     : "";
   const matchHighlightClass = thisNodeMatches
-    ? "bg-yellow-200 dark:bg-yellow-500 rounded px-1 dark:text-black"
+    ? "bg-yellow-200 dark:bg-yellow-500 rounded px-1 dark:!text-black"
     : "";
 
   function handleSelect(e?: React.MouseEvent) {
