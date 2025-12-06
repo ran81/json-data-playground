@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { isPlainObject } from "../lib/jsonUtils";
 
 type Props = {
@@ -23,6 +24,15 @@ export default function TreeNode({
   expandedPaths,
   togglePath,
 }: Props) {
+  const nodeRef = useRef<HTMLDivElement>(null);
+
+  // Scroll into view when selected
+  useEffect(() => {
+    if (selectedPath === path && nodeRef.current) {
+      nodeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [selectedPath, path]);
+
   // Determine whether this node is "expandable" (object or array)
   const isExpandable = typeof value === "object" && value !== null;
 
@@ -67,7 +77,7 @@ export default function TreeNode({
   // Render primitive
   if (!isExpandable) {
     return (
-      <div style={{ paddingLeft: depth * 12 }} className="py-0.5">
+      <div style={{ paddingLeft: depth * 12 }} className="py-0.5" ref={nodeRef}>
         <div
           onClick={handleSelect}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
@@ -88,6 +98,7 @@ export default function TreeNode({
     return (
       <div className="py-0.5">
         <div
+          ref={nodeRef}
           style={{ paddingLeft: depth * 12 }}
           onClick={handleSelect}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
@@ -128,6 +139,7 @@ export default function TreeNode({
     return (
       <div className="py-0.5">
         <div
+          ref={nodeRef}
           style={{ paddingLeft: depth * 12 }}
           onClick={handleSelect}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}

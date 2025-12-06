@@ -178,7 +178,7 @@ export default function TreeView({
       </div>
 
       {/* Tree root */}
-      <div className="bg-white border rounded p-2">
+      <div className="bg-white border rounded p-2 max-h-[60vh] overflow-auto">
         <TreeNode
           name="Root"
           value={value}
@@ -196,7 +196,9 @@ export default function TreeView({
 }
 
 function countTreeMatches(value: unknown, name: string, term: string): number {
-  if (!term) return 0;
+  if (!term) {
+    return 0;
+  }
   const lowerTerm = term.toLowerCase();
 
   let count = 0;
