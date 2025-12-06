@@ -1,5 +1,9 @@
 import type { TsType } from "./types";
+import type { TypeRegistry } from "./inferType";
 
+/**
+ * Recursively render a TsType to a TypeScript type string.
+ */
 function renderType(t: TsType, indent = 0): string {
   const pad = "  ".repeat(indent);
 
@@ -17,34 +21,27 @@ function renderType(t: TsType, indent = 0): string {
 
     case "array": {
       const el = renderType(t.element, indent);
-
-      // Wrap only if the element is a union (never for objects)
       if (t.element.kind === "union") {
         return `(${el})[]`;
       }
-
       return `${el}[]`;
     }
 
     case "union": {
-      // Join each union member (each rendered recursively)
       return t.types.map((m) => renderType(m, indent)).join(" | ");
     }
 
     case "object": {
-      // Pretty-print object with newlines and indentation
       const entries = Object.entries(t.fields);
       if (entries.length === 0) return "{}";
-
       const inner = entries
-        .map(([k, v]) => {
-          const val = renderType(v, indent + 1);
-          return `${pad}  ${k}: ${val};`;
-        })
+        .map(([k, v]) => `${pad}  ${k}: ${renderType(v, indent + 1)};`)
         .join("\n");
-
       return `{\n${inner}\n${pad}}`;
     }
+
+    case "ref":
+      return t.name;
 
     default:
       return "unknown";
@@ -52,15 +49,26 @@ function renderType(t: TsType, indent = 0): string {
 }
 
 /**
- * Render top-level TypeScript output.
- * If the top-level type is an object → emit `interface <name> { ... }`
- * otherwise emit `type <name> = <type-expression>;`
+ * Render all TypeScript types: nested definitions + root
  */
-export function renderTs(name: string, t: TsType): string {
-  if (t.kind === "object") {
-    return `interface ${name} ${renderType(t, 0)}`;
+export function renderAllTypes(
+  rootName: string,
+  rootType: TsType,
+  registry: TypeRegistry
+): string {
+  let out = "";
+
+  // 1️⃣ Render nested named types first
+  for (const [name, t] of registry.definitions.entries()) {
+    out += `interface ${name} ${renderType(t)}\n\n`;
   }
 
-  // for non-object top-levels, use a type alias
-  return `type ${name} = ${renderType(t, 0)};`;
+  // 2️⃣ Render root
+  if (rootType.kind === "object") {
+    out += `interface ${rootName} ${renderType(rootType)}`;
+  } else {
+    out += `type ${rootName} = ${renderType(rootType)};`;
+  }
+
+  return out.trim();
 }

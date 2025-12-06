@@ -1,10 +1,26 @@
 import type { TsType } from "./types";
 
-export function inferType(value: unknown): TsType {
+export type TypeRegistry = {
+  definitions: Map<string, TsType>;
+};
+
+export function createRegistry(): TypeRegistry {
+  return { definitions: new Map() };
+}
+
+/**
+ * Infer a TsType from a value.
+ * - rootName: used for root object or element naming
+ * - isRoot: whether this is the top-level value
+ */
+export function inferType(
+  value: unknown,
+  registry: TypeRegistry,
+  parentKey: string = "Root",
+  isRoot: boolean = true
+): TsType {
   if (value === null) return { kind: "null" };
-
   const t = typeof value;
-
   if (t === "string") return { kind: "string" };
   if (t === "number") return { kind: "number" };
   if (t === "boolean") return { kind: "boolean" };
@@ -15,19 +31,29 @@ export function inferType(value: unknown): TsType {
     if (value.length === 0)
       return { kind: "array", element: { kind: "unknown" } };
 
-    const elementTypes = value.map(inferType);
+    // Infer element types
+    const elementTypes = value.map((v) =>
+      inferType(v, registry, singularize(parentKey), false)
+    );
     return unifyArrayTypes(elementTypes);
   }
 
   // Object
   const obj = value as Record<string, unknown>;
   const fields: Record<string, TsType> = {};
-
   for (const key of Object.keys(obj)) {
-    fields[key] = inferType(obj[key]);
+    fields[key] = inferType(obj[key], registry, capitalize(key), false);
   }
 
-  return { kind: "object", fields };
+  const objectType: TsType = { kind: "object", fields };
+
+  // Only register nested objects (not the root object)
+  if (!isRoot) {
+    registry.definitions.set(parentKey, objectType);
+    return { kind: "ref", name: parentKey };
+  }
+
+  return objectType;
 }
 
 // Merge array element types into a single TsType
@@ -47,7 +73,6 @@ function unifyArrayTypes(types: TsType[]): TsType {
 }
 
 function mergeUnion(types: TsType[]): TsType[] {
-  // Deduplicate structural equals
   const unique: TsType[] = [];
   for (const t of types) {
     if (!unique.some((u) => JSON.stringify(u) === JSON.stringify(t))) {
@@ -55,4 +80,19 @@ function mergeUnion(types: TsType[]): TsType[] {
     }
   }
   return unique;
+}
+
+// Helpers for naming
+function capitalize(str: string): string {
+  if (!str) return str;
+  return str[0].toUpperCase() + str.slice(1);
+}
+
+// Simple singularize for array elements: "users" → "User"
+function singularize(str: string): string {
+  if (!str) return str;
+  if (str.endsWith("s") && str.length > 1) {
+    return capitalize(str.slice(0, -1));
+  }
+  return capitalize(str);
 }

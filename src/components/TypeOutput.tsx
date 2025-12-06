@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { inferType } from "../lib/inferType";
-import { renderTs } from "../lib/renderTs";
+import { inferType, createRegistry } from "../lib/inferType";
+import { renderAllTypes } from "../lib/renderTs";
 
 type Props = {
   value: unknown;
@@ -10,8 +10,14 @@ export default function TypeOutput({ value }: Props) {
   const output = useMemo(() => {
     if (value === null) return null;
 
-    const typeAst = inferType(value);
-    return renderTs("Root", typeAst);
+    // 1) create a fresh registry for this inference run
+    const registry = createRegistry();
+
+    // 2) infer the root type (this will populate registry.definitions)
+    const rootType = inferType(value, registry, "Root");
+
+    // 3) render all types (Root + any named nested types)
+    return renderAllTypes("Root", rootType, registry);
   }, [value]);
 
   if (value === null) {
