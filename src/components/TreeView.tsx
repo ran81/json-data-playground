@@ -158,7 +158,7 @@ export default function TreeView({
             className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
             title="Expand all nodes"
           >
-            Expand All
+            Expand
           </button>
 
           <button
@@ -166,7 +166,7 @@ export default function TreeView({
             className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-150"
             title="Collapse all nodes"
           >
-            Collapse All
+            Collapse
           </button>
         </div>
       </div>
