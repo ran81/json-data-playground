@@ -114,6 +114,7 @@ export default function JsonEditor({ value, onChange, onClear, stats }: Props) {
   };
 
   const handleSample = () => {
+    onClear?.();
     onChange(sampleJson);
     editorRef.current?.setValue(sampleJson);
   };
