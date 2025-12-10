@@ -73,7 +73,11 @@ export default function TreeNode({
   // Render primitive
   if (!isExpandable) {
     return (
-      <div style={{ paddingLeft: depth * 12 }} ref={nodeRef}>
+      <div
+        style={{ paddingLeft: depth * 12 }}
+        ref={nodeRef}
+        data-nodepath={path}
+      >
         <div
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
           onClick={handleSelect}
@@ -105,6 +109,7 @@ export default function TreeNode({
       <div>
         <div
           ref={nodeRef}
+          data-nodepath={path}
           style={{ paddingLeft: depth * 12 }}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
           onClick={handleSelect}
@@ -155,6 +160,7 @@ export default function TreeNode({
       <div>
         <div
           ref={nodeRef}
+          data-nodepath={path}
           style={{ paddingLeft: depth * 12 }}
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
           onClick={handleSelect}
@@ -197,7 +203,7 @@ export default function TreeNode({
 
   // Fallback
   return (
-    <div style={{ paddingLeft: depth * 12 }}>
+    <div style={{ paddingLeft: depth * 12 }} data-nodepath={path}>
       <div
         className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
         onClick={handleSelect}

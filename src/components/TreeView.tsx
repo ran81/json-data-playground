@@ -1,3 +1,4 @@
+import { startTransition } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import TreeNode from "./TreeNode";
@@ -22,8 +23,30 @@ export default function TreeView({
 }: Props) {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [matchState, setMatchState] = useState({
+    paths: [] as string[],
+    index: 0,
+  });
   const matchCount = countTreeMatches(value, "root", searchTerm);
 
+  // Track matched paths
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      startTransition(() => {
+        setMatchState({ paths: [], index: 0 });
+      });
+      return;
+    }
+
+    const acc: string[] = [];
+    collectMatchPaths(value, "Root", searchTerm.trim(), acc);
+
+    startTransition(() => {
+      setMatchState({ paths: acc, index: 0 });
+    });
+  }, [value, searchTerm]);
+
+  // Handle Ctrl+f to search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Ctrl+F or Cmd+F
@@ -38,22 +61,27 @@ export default function TreeView({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // toggle a single path
+  // Toggle (expand/collapse) a single path
   const togglePath = useCallback((p: string) => {
     setExpandedPaths((prev) => {
       const next = new Set(prev);
-      if (next.has(p)) next.delete(p);
-      else next.add(p);
+      if (next.has(p)) {
+        next.delete(p);
+      } else {
+        next.add(p);
+      }
       return next;
     });
   }, []);
 
-  // collect all expandable paths (objects/arrays) from the root
+  // Collect all expandable paths (objects/arrays) from the root
   const collectExpandablePaths = useCallback((rootValue: unknown) => {
     const result = new Set<string>();
 
     function walk(v: unknown, path: string) {
-      if (v === null || typeof v !== "object") return;
+      if (v === null || typeof v !== "object") {
+        return;
+      }
 
       // this path is expandable (object or array)
       result.add(path);
@@ -82,14 +110,19 @@ export default function TreeView({
     setExpandedPaths(new Set());
   }, []);
 
+  // Paths that are expanded automatically (they contain matches)
   const autoExpandedPaths = useMemo(() => {
-    if (!searchTerm.trim()) return new Set<string>();
+    if (!searchTerm.trim()) {
+      return new Set<string>();
+    }
 
     const result = new Set<string>();
     const term = searchTerm.trim().toLowerCase();
 
     function walk(value: unknown, path: string) {
-      if (value === null || typeof value !== "object") return;
+      if (value === null || typeof value !== "object") {
+        return;
+      }
 
       // check if any child matches
       const matches = (v: unknown, name: string): boolean => {
@@ -137,6 +170,29 @@ export default function TreeView({
             placeholder="Search keys or values..."
             value={searchInputValue}
             onChange={(e) => onSearchInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && matchState.paths.length > 0) {
+                // Shift+Enter → go backwards
+                let idx;
+                if (e.shiftKey) {
+                  idx =
+                    (matchState.index - 1 + matchState.paths.length) %
+                    matchState.paths.length;
+                } else {
+                  idx = (matchState.index + 1) % matchState.paths.length;
+                }
+
+                setMatchState((prevState) => ({ ...prevState, index: idx }));
+
+                const target = document.querySelector(
+                  `[data-nodepath="${matchState.paths[idx]}"]`
+                );
+                target?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
+            }}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
           {searchTerm && (
@@ -178,9 +234,9 @@ export default function TreeView({
       />
 
       {/* Match count */}
-      {searchTerm && (
+      {matchState.paths.length > 0 && (
         <div className="text-sm text-gray-600 dark:text-gray-400 text-right">
-          Matches: {matchCount}
+          Showing match {matchState.index + 1} of {matchCount} matches
         </div>
       )}
 
@@ -233,4 +289,35 @@ function countTreeMatches(value: unknown, name: string, term: string): number {
   }
 
   return count;
+}
+
+function collectMatchPaths(
+  v: unknown,
+  path: string,
+  term: string,
+  acc: string[]
+) {
+  const lower = term.toLowerCase();
+
+  const isMatch = () => {
+    const name = path.split(".").pop() || "";
+    if (name.toLowerCase().includes(lower)) return true;
+    if (v === null) return "null".includes(lower);
+    if (typeof v !== "object") return String(v).toLowerCase().includes(lower);
+    return false;
+  };
+
+  if (isMatch()) acc.push(path);
+
+  if (v && typeof v === "object") {
+    if (Array.isArray(v)) {
+      v.forEach((child, i) =>
+        collectMatchPaths(child, `${path}[${i}]`, term, acc)
+      );
+    } else {
+      Object.entries(v).forEach(([k, val]) =>
+        collectMatchPaths(val, `${path}.${k}`, term, acc)
+      );
+    }
+  }
 }
