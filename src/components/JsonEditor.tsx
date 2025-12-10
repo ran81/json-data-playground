@@ -19,6 +19,8 @@ const sampleJson = `{
   "active": true
 }`;
 
+const LS_KEY = "json_playground__value";
+
 export default function JsonEditor({
   value,
   onChange,
@@ -158,7 +160,7 @@ export default function JsonEditor({
         <div className="flex gap-2 ml-auto flex-wrap">
           <button
             className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 dark:hover:bg-green-500 transition-colors duration-150 shadow-sm"
-            onClick={() => localStorage.setItem("json-playground-value", value)}
+            onClick={() => localStorage.setItem(LS_KEY, value)}
           >
             Save
           </button>
@@ -166,7 +168,7 @@ export default function JsonEditor({
           <button
             className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-150 shadow-sm text-gray-800 dark:text-gray-100"
             onClick={() => {
-              const stored = localStorage.getItem("json-playground-value");
+              const stored = localStorage.getItem(LS_KEY);
               if (stored != null) onChange(stored);
             }}
           >

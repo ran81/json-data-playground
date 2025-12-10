@@ -9,7 +9,9 @@ type Props = {
 
 export default function TypeOutput({ value }: Props) {
   const output = useMemo(() => {
-    if (value === null) return null;
+    if (value === null) {
+      return null;
+    }
 
     // 1) create a fresh registry for this inference run
     const registry = createRegistry();

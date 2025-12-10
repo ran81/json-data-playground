@@ -172,7 +172,6 @@ export default function TreeView({
             onChange={(e) => onSearchInputChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && matchState.paths.length > 0) {
-                // Shift+Enter → go backwards
                 let idx;
                 if (e.shiftKey) {
                   idx =
@@ -193,8 +192,50 @@ export default function TreeView({
                 });
               }
             }}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full p-2 pr-16 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
+
+          {/* ▼ Next match */}
+          {searchTerm && matchState.paths.length > 0 && (
+            <button
+              className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150"
+              onClick={() => {
+                const idx = (matchState.index + 1) % matchState.paths.length;
+                setMatchState((s) => ({ ...s, index: idx }));
+
+                document
+                  .querySelector(`[data-nodepath="${matchState.paths[idx]}"]`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              aria-label="Next match"
+              title="Next match"
+            >
+              ▼
+            </button>
+          )}
+
+          {/* ▲ Previous match */}
+          {searchTerm && matchState.paths.length > 0 && (
+            <button
+              className="absolute right-14 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150"
+              onClick={() => {
+                const idx =
+                  (matchState.index - 1 + matchState.paths.length) %
+                  matchState.paths.length;
+                setMatchState((s) => ({ ...s, index: idx }));
+
+                document
+                  .querySelector(`[data-nodepath="${matchState.paths[idx]}"]`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              aria-label="Previous match"
+              title="Previous match"
+            >
+              ▲
+            </button>
+          )}
+
+          {/* Clear button */}
           {searchTerm && (
             <button
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-150"
@@ -208,6 +249,7 @@ export default function TreeView({
             </button>
           )}
         </div>
+
         <div className="flex gap-2 ml-2">
           <button
             onClick={expandAll}
@@ -241,7 +283,7 @@ export default function TreeView({
       )}
 
       {/* Tree root */}
-      <div className="max-h-[60vh] overflow-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100">
+      <div className="max-h-[57vh] overflow-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100">
         <TreeNode
           name="Root"
           value={value}

@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { ClipboardIcon, CheckIcon } from "@heroicons/react/24/outline";
 
-function CopyButton({ text, tooltip }: { text: string; tooltip: string }) {
+type Props = {
+  text: string;
+  tooltip: string;
+};
+
+function CopyButton({ text, tooltip }: Props) {
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(false);
 

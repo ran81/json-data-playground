@@ -230,9 +230,17 @@ function primitiveColor(v: unknown) {
 }
 
 function getPrimitiveString(value: unknown) {
-  if (typeof value === "string") return `"${value}"`;
-  if (value === null) return "null";
-  if (typeof value === "undefined") return "undefined";
-  if (typeof value === "object") return null;
+  if (typeof value === "string") {
+    return `"${value}"`;
+  }
+  if (value === null) {
+    return "null";
+  }
+  if (typeof value === "undefined") {
+    return "undefined";
+  }
+  if (typeof value === "object") {
+    return null;
+  }
   return String(value);
 }

@@ -24,10 +24,14 @@ function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     try {
       // If window is undefined (SSR), default to false
-      if (typeof window === "undefined") return false;
+      if (typeof window === "undefined") {
+        return false;
+      }
 
       const saved = localStorage.getItem(LS_KEY);
-      if (saved !== null) return saved === "true";
+      if (saved !== null) {
+        return saved === "true";
+      }
 
       // fallback to system preference
       return window.matchMedia &&
@@ -42,8 +46,11 @@ function App() {
   // Apply body class and persist to localStorage when darkMode changes
   useEffect(() => {
     try {
-      if (darkMode) document.body.classList.add("dark");
-      else document.body.classList.remove("dark");
+      if (darkMode) {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
 
       localStorage.setItem(LS_KEY, String(darkMode));
     } catch {
@@ -58,7 +65,7 @@ function App() {
   useEffect(() => {
     const id = setTimeout(() => {
       setDebouncedSearch(inputSearch);
-    }, 200);
+    }, 700);
 
     return () => clearTimeout(id);
   }, [inputSearch]);
