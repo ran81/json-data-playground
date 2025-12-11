@@ -1,4 +1,4 @@
-import { startTransition } from "react";
+import { startTransition, useMemo } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import TreeNode from "./TreeNode";
@@ -109,9 +109,17 @@ export default function TreeView({
     setExpandedPaths(new Set());
   }, []);
 
+  const mergedExpandedPaths = useMemo(() => {
+    return new Set([...expandedPaths, ...autoExpandedPaths]);
+  }, [expandedPaths, autoExpandedPaths]);
+
+  const matchesSet = useMemo(() => {
+    return new Set(result.paths ?? []);
+  }, [result.paths]);
+
   // Compute active match path and friendly count
   const matches = result.paths ?? [];
-  const matchCount = result.count ?? matches.length;
+  const matchCount = result.count ?? matchesSet.size;
   const currentMatchPath = matches[matchIndex] ?? null;
 
   return (
@@ -238,15 +246,12 @@ export default function TreeView({
           path="Root"
           selectedPath={selectedPath}
           onSelectPath={onSelectPath}
-          searchTerm={searchTerm}
-          // Expanded path include both the one opened manually
+          // Expanded path include both the ones opened manually
           // and the ones opened cause of matches
-          expandedPaths={
-            new Set([...expandedPaths, ...Array.from(autoExpandedPaths)])
-          }
+          expandedPaths={mergedExpandedPaths}
           togglePath={togglePath}
           activeMatchPath={currentMatchPath}
-          allMatches={matches}
+          allMatchesSet={matchesSet}
         />
       </div>
     </div>

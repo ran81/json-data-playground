@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { isPlainObject } from "../lib/jsonUtils";
 
 type Props = {
@@ -8,27 +8,25 @@ type Props = {
   path: string;
   selectedPath: string;
   onSelectPath: (p: string) => void;
-  searchTerm: string;
   expandedPaths: Set<string>;
   togglePath: (p: string) => void;
 
   // NEW (optional): worker-provided match info
   activeMatchPath?: string | null;
-  allMatches?: string[]; // array of data-nodepath strings
+  allMatchesSet?: Set<string>;
 };
 
-export default function TreeNode({
+function TreeNode({
   name,
   value,
   depth,
   path,
   selectedPath,
   onSelectPath,
-  searchTerm,
   expandedPaths,
   togglePath,
   activeMatchPath,
-  allMatches,
+  allMatchesSet,
 }: Props) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -42,27 +40,12 @@ export default function TreeNode({
   const isExpandable = typeof value === "object" && value !== null;
   const valueAsString = getPrimitiveString(value);
 
-  const term = searchTerm.trim().toLowerCase();
-
-  // Old (fallback) matching based on searchTerm
-  const keyMatches = term.length > 0 && name.toLowerCase().includes(term);
-  const valueMatches =
-    term.length > 0 &&
-    valueAsString !== null &&
-    valueAsString.toLowerCase().includes(term);
-
-  // Worker-based matching (preferred when provided)
-  const usingWorkerMatches = Array.isArray(allMatches);
-  const matchesSet = usingWorkerMatches ? new Set(allMatches) : null;
-  const pathMatchedByWorker = usingWorkerMatches
-    ? matchesSet!.has(path)
-    : false;
-  const isActiveMatch = usingWorkerMatches ? activeMatchPath === path : false;
+  // Worker-based matching
+  const pathMatchedByWorker = allMatchesSet ? allMatchesSet.has(path) : false;
+  const isActiveMatch = activeMatchPath === path;
 
   // Decide whether this node should be highlighted as a match
-  const thisNodeMatches = usingWorkerMatches
-    ? pathMatchedByWorker
-    : keyMatches || valueMatches;
+  const thisNodeMatches = pathMatchedByWorker;
 
   const isSelected = selectedPath === path;
   const isExpanded = expandedPaths.has(path);
@@ -121,14 +104,10 @@ export default function TreeNode({
           <span
             className={`${primitiveColor(value)} ${
               // if using worker matches, highlight by class; otherwise preserve old behavior where valueMatches adds text color
-              usingWorkerMatches
-                ? thisNodeMatches
-                  ? isActiveMatch
-                    ? activeMatchClass + " text-gray-900 dark:text-gray-100"
-                    : matchHighlightClass + " text-gray-900 dark:text-gray-100"
-                  : ""
-                : valueMatches
-                ? matchHighlightClass + " text-gray-900 dark:text-gray-100"
+              thisNodeMatches
+                ? isActiveMatch
+                  ? activeMatchClass + " text-gray-900 dark:text-gray-100"
+                  : matchHighlightClass + " text-gray-900 dark:text-gray-100"
                 : ""
             }`}
           >
@@ -181,11 +160,10 @@ export default function TreeNode({
               path={`${path}[${i}]`}
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
-              searchTerm={searchTerm}
               expandedPaths={expandedPaths}
               togglePath={togglePath}
               activeMatchPath={activeMatchPath}
-              allMatches={allMatches}
+              allMatchesSet={allMatchesSet}
             />
           ))}
       </div>
@@ -234,11 +212,10 @@ export default function TreeNode({
               path={`${path}.${k}`}
               selectedPath={selectedPath}
               onSelectPath={onSelectPath}
-              searchTerm={searchTerm}
               expandedPaths={expandedPaths}
               togglePath={togglePath}
               activeMatchPath={activeMatchPath}
-              allMatches={allMatches}
+              allMatchesSet={allMatchesSet}
             />
           ))}
       </div>
@@ -288,3 +265,5 @@ function getPrimitiveString(value: unknown) {
   }
   return String(value);
 }
+
+export default memo(TreeNode);
