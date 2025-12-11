@@ -11,6 +11,10 @@ type Props = {
   searchTerm: string;
   expandedPaths: Set<string>;
   togglePath: (p: string) => void;
+
+  // NEW (optional): worker-provided match info
+  activeMatchPath?: string | null;
+  allMatches?: string[]; // array of data-nodepath strings
 };
 
 export default function TreeNode({
@@ -23,6 +27,8 @@ export default function TreeNode({
   searchTerm,
   expandedPaths,
   togglePath,
+  activeMatchPath,
+  allMatches,
 }: Props) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -37,13 +43,27 @@ export default function TreeNode({
   const valueAsString = getPrimitiveString(value);
 
   const term = searchTerm.trim().toLowerCase();
+
+  // Old (fallback) matching based on searchTerm
   const keyMatches = term.length > 0 && name.toLowerCase().includes(term);
   const valueMatches =
     term.length > 0 &&
     valueAsString !== null &&
     valueAsString.toLowerCase().includes(term);
 
-  const thisNodeMatches = keyMatches || valueMatches;
+  // Worker-based matching (preferred when provided)
+  const usingWorkerMatches = Array.isArray(allMatches);
+  const matchesSet = usingWorkerMatches ? new Set(allMatches) : null;
+  const pathMatchedByWorker = usingWorkerMatches
+    ? matchesSet!.has(path)
+    : false;
+  const isActiveMatch = usingWorkerMatches ? activeMatchPath === path : false;
+
+  // Decide whether this node should be highlighted as a match
+  const thisNodeMatches = usingWorkerMatches
+    ? pathMatchedByWorker
+    : keyMatches || valueMatches;
+
   const isSelected = selectedPath === path;
   const isExpanded = expandedPaths.has(path);
 
@@ -55,8 +75,13 @@ export default function TreeNode({
   const hoverClass = !isSelected
     ? "hover:bg-gray-200 dark:hover:bg-gray-800 hover:shadow-sm"
     : "";
+
+  // Match highlight (worker match) vs active match (stronger)
   const matchHighlightClass = thisNodeMatches
     ? "bg-yellow-200 dark:bg-yellow-500 rounded px-1 dark:!text-black"
+    : "";
+  const activeMatchClass = isActiveMatch
+    ? "bg-yellow-300 dark:bg-yellow-400 ring-1 ring-yellow-400 rounded px-1 dark:!text-black"
     : "";
 
   function handleSelect(e?: React.MouseEvent) {
@@ -70,6 +95,16 @@ export default function TreeNode({
     onSelectPath(path);
   }
 
+  // Helper to combine classes for the key and value spans
+  const keyClassForNode = (extra = "") =>
+    `${extra} mr-2 text-gray-700 dark:text-gray-300 ${
+      thisNodeMatches
+        ? isActiveMatch
+          ? activeMatchClass
+          : matchHighlightClass
+        : ""
+    }`;
+
   // Render primitive
   if (!isExpandable) {
     return (
@@ -82,16 +117,17 @@ export default function TreeNode({
           className={`${baseLineClasses} ${selectedClass} ${hoverClass}`}
           onClick={handleSelect}
         >
-          <span
-            className={`mr-2 text-gray-700 dark:text-gray-300 ${
-              keyMatches ? matchHighlightClass : ""
-            }`}
-          >
-            {name}:
-          </span>
+          <span className={keyClassForNode("")}>{name}:</span>
           <span
             className={`${primitiveColor(value)} ${
-              valueMatches
+              // if using worker matches, highlight by class; otherwise preserve old behavior where valueMatches adds text color
+              usingWorkerMatches
+                ? thisNodeMatches
+                  ? isActiveMatch
+                    ? activeMatchClass + " text-gray-900 dark:text-gray-100"
+                    : matchHighlightClass + " text-gray-900 dark:text-gray-100"
+                  : ""
+                : valueMatches
                 ? matchHighlightClass + " text-gray-900 dark:text-gray-100"
                 : ""
             }`}
@@ -122,8 +158,10 @@ export default function TreeNode({
           </button>
           <span
             className={`${
-              keyMatches
-                ? matchHighlightClass
+              thisNodeMatches
+                ? isActiveMatch
+                  ? activeMatchClass
+                  : matchHighlightClass
                 : "text-gray-700 dark:text-gray-300"
             }`}
           >
@@ -146,6 +184,8 @@ export default function TreeNode({
               searchTerm={searchTerm}
               expandedPaths={expandedPaths}
               togglePath={togglePath}
+              activeMatchPath={activeMatchPath}
+              allMatches={allMatches}
             />
           ))}
       </div>
@@ -173,8 +213,10 @@ export default function TreeNode({
           </button>
           <span
             className={`${
-              keyMatches
-                ? matchHighlightClass
+              thisNodeMatches
+                ? isActiveMatch
+                  ? activeMatchClass
+                  : matchHighlightClass
                 : "text-gray-700 dark:text-gray-300"
             }`}
           >
@@ -195,6 +237,8 @@ export default function TreeNode({
               searchTerm={searchTerm}
               expandedPaths={expandedPaths}
               togglePath={togglePath}
+              activeMatchPath={activeMatchPath}
+              allMatches={allMatches}
             />
           ))}
       </div>
