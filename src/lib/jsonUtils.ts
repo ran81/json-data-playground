@@ -1,10 +1,4 @@
-export function isPlainObject(
-  value: unknown
-): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-// Collect expandable paths (same as before)
+// Collect expandable paths
 export function getAllExpandablePaths(rootValue: unknown): Set<string> {
   const result = new Set<string>();
 
@@ -62,7 +56,7 @@ export function collectMatchPaths(
   }
 }
 
-// Return array of paths that should be auto-expanded.
+// Return array of paths that should be auto-expanded
 export function collectAutoExpandedPaths(rootValue: unknown, term: string) {
   if (!term.trim()) return [];
 
