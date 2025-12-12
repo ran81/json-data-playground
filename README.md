@@ -22,3 +22,7 @@ Paste JSON (or drag/import file) on the left, and see a structured, collapsible 
 npm install
 npm run dev
 ```
+
+## Preview
+
+![Screenshot](./public/screenshot.png)
