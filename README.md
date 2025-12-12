@@ -1,7 +1,7 @@
 # JSON → TypeScript Type Explorer
 
 A small web tool for exploring JSON data and instantly generating TypeScript types from it.  
-Paste JSON (or drag/import file) on the left, and see a structured, collapsible tree on the right, along with the inferred TypeScript type.
+Paste JSON (or drag/import file) on the left, and see a structured, collapsible tree on the right, along with the inferred TypeScript type. Search runs inside a Web Worker to keep the UI smooth and responsive, even when handling large JSON inputs.
 
 ## Features
 
@@ -10,7 +10,6 @@ Paste JSON (or drag/import file) on the left, and see a structured, collapsible 
 - Automatically **generates TypeScript types** from the JSON structure.
 - **Copy TS button** for quick workflow.
 - **Search support** using your browser's `Ctrl+F`.
-- Minimal, focused UI - not an IDE.
 
 ## Tech Stack
 

@@ -5,8 +5,7 @@ import JsonEditor from "./components/JsonEditor";
 import ErrorBox from "./components/ErrorBox";
 import TypeOutput from "./components/TypeOutput";
 import TreeView from "./components/TreeView";
-
-const LS_KEY = "json_playground__dark-mode";
+import { LS_KEY_THEME } from "./constants";
 
 function App() {
   const { text, setText, parsedJson, error, stats } = useJsonState();
@@ -28,7 +27,7 @@ function App() {
         return false;
       }
 
-      const saved = localStorage.getItem(LS_KEY);
+      const saved = localStorage.getItem(LS_KEY_THEME);
       if (saved !== null) {
         return saved === "true";
       }
@@ -52,7 +51,7 @@ function App() {
         document.body.classList.remove("dark");
       }
 
-      localStorage.setItem(LS_KEY, String(darkMode));
+      localStorage.setItem(LS_KEY_THEME, String(darkMode));
     } catch {
       // ignore (e.g. storage disabled)
     }
