@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useJsonState } from "./hooks/useJsonState";
 import { useResize } from "./hooks/useResize";
-import JsonEditor from "./components/JsonEditor";
 import ErrorBox from "./components/ErrorBox";
 import TypeOutput from "./components/TypeOutput";
 import TreeView from "./components/TreeView";
 import { LS_KEY_THEME } from "./constants";
+
+const LazyJsonEditor = lazy(() => import("./components/JsonEditor"));
 
 function App() {
   const { text, setText, parsedJson, error, stats } = useJsonState();
@@ -104,13 +105,17 @@ function App() {
           style={{ width: `${leftWidth}%` }}
           className="border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col gap-4 h-[89vh] bg-gray-50 dark:bg-gray-900"
         >
-          <JsonEditor
-            value={text}
-            onChange={setText}
-            onClear={handleClear}
-            stats={stats}
-            darkMode={darkMode}
-          />
+          <Suspense
+            fallback={<div className="p-4 text-gray-500">Loading editor…</div>}
+          >
+            <LazyJsonEditor
+              value={text}
+              onChange={setText}
+              onClear={handleClear}
+              stats={stats}
+              darkMode={darkMode}
+            />
+          </Suspense>
         </div>
 
         {/* Drag handle */}
