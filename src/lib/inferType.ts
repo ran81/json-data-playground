@@ -26,7 +26,6 @@ export function inferType(
   if (t === "boolean") return { kind: "boolean" };
   if (t !== "object") return { kind: "unknown" };
 
-  // Array
   if (Array.isArray(value)) {
     if (value.length === 0)
       return { kind: "array", element: { kind: "unknown" } };

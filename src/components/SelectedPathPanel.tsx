@@ -10,7 +10,6 @@ function SelectedPathPanel({
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-3 relative">
-      {/* Header: title + copy button */}
       <div className="flex justify-between items-center mb-2">
         <h2 className="font-semibold text-gray-800 dark:text-gray-100 font-sans">
           Selected Path
@@ -18,7 +17,6 @@ function SelectedPathPanel({
         <CopyButton text={selectedPath} tooltip="Copy path" />
       </div>
 
-      {/* Path display */}
       <div className="flex items-center gap-2">
         <div className="flex-1 flex items-center gap-2 break-all text-sm text-gray-700 dark:text-gray-300">
           <span>{selectedPath || "-"}</span>

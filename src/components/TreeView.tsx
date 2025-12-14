@@ -71,7 +71,6 @@ export default function TreeView({
     });
   }, [result]);
 
-  // Ctrl+F or Cmd+F -> focus search input
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "f") {
@@ -140,7 +139,6 @@ export default function TreeView({
   const matchCount = result.count ?? matchesSet.size;
   const currentMatchPath = matches[matchIndex] ?? null;
 
-  // Handler to go to next match
   const goToNextMatch = () => {
     if (!listRef.current || matches.length === 0) {
       return;
@@ -161,7 +159,6 @@ export default function TreeView({
     }
   };
 
-  // Handler to go to previous match
   const goToPrevMatch = () => {
     if (!listRef.current || matches.length === 0) {
       return;
@@ -284,10 +281,7 @@ export default function TreeView({
           listRef={listRef}
           rowComponent={({ index, style, ...rest }) => (
             <div style={style} key={visibleNodes[index].path}>
-              <NodeRow
-                node={visibleNodes[index]}
-                {...rest} // togglePath, selectedPath, etc via rowProps
-              />
+              <NodeRow node={visibleNodes[index]} {...rest} />
             </div>
           )}
           rowCount={visibleNodes.length}

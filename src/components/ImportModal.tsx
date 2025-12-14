@@ -27,7 +27,9 @@ function ImportModal({ open, onClose, onImport }: Props) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

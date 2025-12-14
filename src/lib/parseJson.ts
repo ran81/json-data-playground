@@ -4,7 +4,7 @@ export type ParseResult =
 
 export function parseJson(input: string): ParseResult {
   if (input.trim() === "") {
-    return { ok: true, value: null }; // Empty until user types
+    return { ok: true, value: null };
   }
 
   try {

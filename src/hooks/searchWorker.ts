@@ -10,7 +10,7 @@ type ResponseMsg = {
   id: number;
   paths: string[];
   count: number;
-  autoExpandedPaths: string[]; // array so it's serializable
+  autoExpandedPaths: string[];
 };
 
 self.onmessage = (ev: MessageEvent) => {
@@ -18,7 +18,6 @@ self.onmessage = (ev: MessageEvent) => {
   const { id, value, term } = msg;
 
   if (!term || !term.trim()) {
-    // early return
     const resp: ResponseMsg = {
       id,
       paths: [],
@@ -39,7 +38,6 @@ self.onmessage = (ev: MessageEvent) => {
     self.postMessage(resp);
   } catch (err: unknown) {
     console.log(err);
-    // avoid crashing worker: send an empty result
     const resp: ResponseMsg = {
       id,
       paths: [],
