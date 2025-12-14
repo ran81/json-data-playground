@@ -29,6 +29,10 @@ export function collectMatchPaths(
   term: string,
   acc: string[]
 ) {
+  if (!term.trim()) {
+    return;
+  }
+
   const lower = term.toLowerCase();
 
   function isMatch(candidateValue: unknown, name: string) {

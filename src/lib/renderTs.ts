@@ -58,12 +58,12 @@ export function renderAllTypes(
 ): string {
   let out = "";
 
-  // 1️⃣ Render nested named types first
+  // Render nested named types first
   for (const [name, t] of registry.definitions.entries()) {
     out += `interface ${name} ${renderType(t)}\n\n`;
   }
 
-  // 2️⃣ Render root
+  // Render root
   if (rootType.kind === "object") {
     out += `interface ${rootName} ${renderType(rootType)}`;
   } else {

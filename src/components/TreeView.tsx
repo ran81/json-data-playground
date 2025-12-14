@@ -105,6 +105,7 @@ export default function TreeView({
     () => setExpandedPaths(getAllExpandablePaths(value)),
     [value]
   );
+
   const collapseAll = useCallback(() => {
     setAutoExpandedPaths(new Set());
     setExpandedPaths(new Set());
